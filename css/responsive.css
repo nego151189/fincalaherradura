@@ -1,0 +1,764 @@
+/* ========================================
+   ESTILOS RESPONSIVOS - FINCA LIMÓN
+   ======================================== */
+
+/* ===== MOBILE FIRST APPROACH ===== */
+
+/* Extra Small Devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+    /* Sidebar colapsado por defecto en móviles */
+    .sidebar {
+        position: fixed;
+        left: -16rem;
+        top: 0;
+        bottom: 0;
+        z-index: 50;
+        transition: left 0.3s ease-in-out;
+    }
+    
+    .sidebar.open {
+        left: 0;
+    }
+    
+    /* Overlay para cerrar sidebar en móviles */
+    .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 40;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease-in-out;
+    }
+    
+    .sidebar-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    /* Ajustar main content cuando sidebar está cerrado */
+    main {
+        margin-left: 0;
+    }
+    
+    /* Header ajustado para móviles */
+    header {
+        padding: 1rem;
+    }
+    
+    #page-title {
+        font-size: 1.5rem;
+    }
+    
+    /* Ocultar weather widget en móviles */
+    .weather-widget-mobile-hidden {
+        display: none;
+    }
+    
+    /* Grid ajustado para móviles */
+    .metrics-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    /* Tarjetas de árboles en móviles */
+    .trees-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .tree-card-body {
+        padding: 1rem;
+    }
+    
+    .tree-stats {
+        gap: 0.5rem;
+    }
+    
+    /* Botones apilados en móviles */
+    .tree-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    /* Actividades responsivas */
+    .activity-stats {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    /* Gráficos en móviles */
+    .chart-container {
+        padding: 1rem;
+    }
+    
+    /* Mapa ajustado */
+    .map-view {
+        height: 250px;
+    }
+    
+    .map-legend {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        padding: 1rem;
+    }
+    
+    /* Calendario móvil */
+    .calendar-day {
+        aspect-ratio: 1.2;
+        padding: 0.25rem;
+    }
+    
+    .calendar-day-number {
+        font-size: 0.75rem;
+    }
+    
+    /* Modal en móviles */
+    .modal-content {
+        margin: 0.5rem;
+        max-height: 95vh;
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 1rem;
+    }
+    
+    /* Tabla responsiva */
+    .table-wrapper {
+        border-radius: 0.5rem;
+    }
+    
+    .table {
+        font-size: 0.875rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.5rem;
+    }
+    
+    /* Notificaciones panel */
+    #notifications-panel {
+        right: 1rem;
+        left: 1rem;
+        width: auto;
+        top: 80px;
+    }
+    
+    /* Toast en móviles */
+    .toast {
+        margin: 0 1rem;
+        max-width: calc(100vw - 2rem);
+    }
+    
+    /* Contenedor principal con padding reducido */
+    .p-6 {
+        padding: 1rem;
+    }
+    
+    /* Formularios en móviles */
+    .form-group {
+        margin-bottom: 0.75rem;
+    }
+    
+    /* Espaciado reducido */
+    .space-y-6 > * + * {
+        margin-top: 1rem;
+    }
+}
+
+/* Small Devices (tablets, 600px to 768px) */
+@media only screen and (min-width: 601px) and (max-width: 768px) {
+    .sidebar {
+        width: 4rem;
+    }
+    
+    .sidebar .sidebar-text {
+        display: none;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .trees-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .activity-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .calendar-day {
+        padding: 0.375rem;
+    }
+    
+    .map-view {
+        height: 300px;
+    }
+    
+    .map-legend {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Medium Devices (small laptops, 769px to 992px) */
+@media only screen and (min-width: 769px) and (max-width: 992px) {
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .trees-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .activity-stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .map-legend {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Large Devices (laptops/desktops, 993px to 1200px) */
+@media only screen and (min-width: 993px) and (max-width: 1200px) {
+    .metrics-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .trees-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .activity-stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Extra Large Devices (large laptops and desktops, 1201px and up) */
+@media only screen and (min-width: 1201px) {
+    .metrics-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .trees-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .activity-stats {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .map-view {
+        height: 500px;
+    }
+}
+
+/* ===== ORIENTACIÓN Y ALTURA ===== */
+
+/* Landscape orientation adjustments */
+@media only screen and (orientation: landscape) and (max-height: 500px) {
+    .sidebar {
+        width: 4rem;
+    }
+    
+    .sidebar .sidebar-text {
+        display: none;
+    }
+    
+    .modal-content {
+        max-height: 85vh;
+    }
+    
+    .calendar-day {
+        aspect-ratio: 1.5;
+    }
+}
+
+/* ===== DISPOSITIVOS ESPECÍFICOS ===== */
+
+/* iPhone SE y dispositivos similares */
+@media only screen and (max-width: 375px) {
+    .sidebar {
+        width: 100vw;
+    }
+    
+    .metric-card {
+        padding: 1rem;
+    }
+    
+    .metric-value {
+        font-size: 2rem;
+    }
+    
+    .tree-card-header {
+        padding: 1rem;
+    }
+    
+    .tree-id {
+        font-size: 1.25rem;
+    }
+    
+    .activity-stat-card {
+        padding: 1rem;
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .activity-stat-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+    
+    .map-view {
+        height: 200px;
+    }
+    
+    .chart-title {
+        font-size: 1rem;
+    }
+    
+    .productivity-tree-id {
+        width: 3rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* iPad y tablets similares */
+@media only screen and (min-width: 768px) and (max-width: 1024px) {
+    .sidebar.collapsed {
+        width: 5rem;
+    }
+    
+    .trees-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .activity-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .calendar-grid {
+        gap: 2px;
+    }
+    
+    .calendar-day {
+        padding: 0.75rem 0.5rem;
+    }
+}
+
+/* ===== UTILIDADES RESPONSIVAS ===== */
+
+/* Ocultar elementos en diferentes breakpoints */
+.hidden-mobile {
+    display: block;
+}
+
+@media only screen and (max-width: 600px) {
+    .hidden-mobile {
+        display: none !important;
+    }
+}
+
+.hidden-tablet {
+    display: block;
+}
+
+@media only screen and (min-width: 601px) and (max-width: 992px) {
+    .hidden-tablet {
+        display: none !important;
+    }
+}
+
+.hidden-desktop {
+    display: block;
+}
+
+@media only screen and (min-width: 993px) {
+    .hidden-desktop {
+        display: none !important;
+    }
+}
+
+/* Mostrar elementos solo en ciertos breakpoints */
+.show-mobile {
+    display: none;
+}
+
+@media only screen and (max-width: 600px) {
+    .show-mobile {
+        display: block !important;
+    }
+}
+
+.show-tablet {
+    display: none;
+}
+
+@media only screen and (min-width: 601px) and (max-width: 992px) {
+    .show-tablet {
+        display: block !important;
+    }
+}
+
+.show-desktop {
+    display: none;
+}
+
+@media only screen and (min-width: 993px) {
+    .show-desktop {
+        display: block !important;
+    }
+}
+
+/* ===== ESPACIADO RESPONSIVO ===== */
+
+/* Reducir espaciado en móviles */
+@media only screen and (max-width: 600px) {
+    .space-y-6 > * + * {
+        margin-top: 1rem !important;
+    }
+    
+    .space-y-4 > * + * {
+        margin-top: 0.75rem !important;
+    }
+    
+    .gap-6 {
+        gap: 1rem !important;
+    }
+    
+    .gap-4 {
+        gap: 0.75rem !important;
+    }
+    
+    .p-6 {
+        padding: 1rem !important;
+    }
+    
+    .p-4 {
+        padding: 0.75rem !important;
+    }
+    
+    .px-6 {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+    
+    .py-4 {
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+}
+
+/* ===== TEXTO RESPONSIVO ===== */
+
+/* Ajustar tamaños de texto */
+@media only screen and (max-width: 600px) {
+    .text-3xl {
+        font-size: 1.875rem !important;
+    }
+    
+    .text-2xl {
+        font-size: 1.5rem !important;
+    }
+    
+    .text-xl {
+        font-size: 1.125rem !important;
+    }
+    
+    .text-lg {
+        font-size: 1rem !important;
+    }
+}
+
+/* ===== NAVEGACIÓN RESPONSIVA ===== */
+
+/* Menú hamburguesa para móviles */
+.mobile-menu-button {
+    display: none;
+}
+
+@media only screen and (max-width: 600px) {
+    .mobile-menu-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        background: var(--white);
+        border: 1px solid var(--gray-300);
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    
+    .mobile-menu-button:hover {
+        background: var(--gray-50);
+    }
+    
+    /* Ocultar toggle del sidebar en móviles */
+    #sidebar-toggle {
+        display: none;
+    }
+}
+
+/* ===== TARJETAS RESPONSIVAS ===== */
+
+/* Ajustar tarjetas en diferentes tamaños */
+@media only screen and (max-width: 600px) {
+    .card {
+        border-radius: 0.5rem;
+        margin: 0 -0.25rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .card-header {
+        padding: 1rem;
+    }
+}
+
+/* ===== FORMULARIOS RESPONSIVOS ===== */
+
+/* Ajustar formularios en móviles */
+@media only screen and (max-width: 600px) {
+    .form-input,
+    .form-select,
+    .form-textarea {
+        padding: 0.75rem 0.5rem;
+        font-size: 1rem; /* Evita zoom en iOS */
+    }
+    
+    .btn {
+        padding: 0.75rem 1rem;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .modal-footer {
+        flex-direction: column-reverse;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+    }
+}
+
+/* ===== GRÁFICOS RESPONSIVOS ===== */
+
+/* Ajustar gráficos y charts */
+@media only screen and (max-width: 600px) {
+    .productivity-chart {
+        gap: 0.75rem;
+    }
+    
+    .productivity-item {
+        gap: 0.75rem;
+    }
+    
+    .productivity-tree-id {
+        width: 2.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .productivity-variety {
+        font-size: 0.75rem;
+    }
+    
+    .productivity-percentage {
+        font-size: 0.75rem;
+    }
+    
+    .productivity-bar {
+        height: 6px;
+    }
+}
+
+/* ===== MAPA RESPONSIVO ===== */
+
+/* Ajustar mapa en diferentes tamaños */
+@media only screen and (max-width: 600px) {
+    .map-tree-marker {
+        width: 20px;
+        height: 20px;
+        border-width: 3px;
+    }
+    
+    .map-tree-tooltip {
+        font-size: 0.625rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .map-path.horizontal,
+    .map-path.vertical {
+        opacity: 0.4;
+    }
+    
+    .map-legend-item {
+        padding: 0.75rem;
+    }
+}
+
+/* ===== CALENDARIO RESPONSIVO ===== */
+
+/* Ajustar calendario */
+@media only screen and (max-width: 600px) {
+    .calendar-day-header {
+        padding: 0.5rem 0.25rem;
+        font-size: 0.625rem;
+    }
+    
+    .calendar-day {
+        min-height: 60px;
+        padding: 0.25rem;
+    }
+    
+    .calendar-day-number {
+        font-size: 0.875rem;
+        margin-bottom: 0.125rem;
+    }
+    
+    .calendar-activity-dot {
+        height: 1.5px;
+    }
+}
+
+/* ===== TABLA RESPONSIVA ===== */
+
+/* Mejorar tablas en móviles */
+@media only screen and (max-width: 600px) {
+    .table-wrapper {
+        border-radius: 0.5rem;
+    }
+    
+    .table {
+        min-width: 600px; /* Forzar scroll horizontal */
+    }
+    
+    .table th {
+        font-size: 0.625rem;
+        padding: 0.5rem 0.25rem;
+        white-space: nowrap;
+    }
+    
+    .table td {
+        padding: 0.5rem 0.25rem;
+        font-size: 0.75rem;
+    }
+    
+    .table-actions {
+        gap: 0.25rem;
+    }
+    
+    .table-action-btn {
+        padding: 0.125rem;
+    }
+}
+
+/* ===== ANIMACIONES RESPONSIVAS ===== */
+
+/* Reducir animaciones en dispositivos de bajo rendimiento */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ===== MODO OSCURO (PREPARACIÓN) ===== */
+
+/* Variables para modo oscuro */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --gray-50: #1f2937;
+        --gray-100: #374151;
+        --gray-200: #4b5563;
+        --gray-300: #6b7280;
+        --gray-600: #d1d5db;
+        --gray-800: #f3f4f6;
+        --white: #111827;
+    }
+    
+    body {
+        color: var(--gray-800);
+        background-color: var(--gray-50);
+    }
+    
+    .card,
+    .sidebar,
+    .modal-content,
+    .notification-panel {
+        background: #1f2937;
+        border-color: #374151;
+    }
+}
+
+/* ===== ACCESIBILIDAD RESPONSIVA ===== */
+
+/* Mejorar accesibilidad en móviles */
+@media only screen and (max-width: 600px) {
+    /* Aumentar área de toque */
+    button,
+    .nav-item,
+    .tree-card,
+    .calendar-day {
+        min-height: 44px; /* Recomendación de Apple */
+    }
+    
+    /* Mejorar contraste en elementos interactivos */
+    .btn:focus,
+    .nav-item:focus,
+    button:focus {
+        outline: 3px solid var(--primary-green);
+        outline-offset: 2px;
+    }
+}
+
+/* ===== IMPRESIÓN RESPONSIVA ===== */
+
+@media print {
+    .sidebar,
+    .mobile-menu-button,
+    #sidebar-toggle,
+    .no-print {
+        display: none !important;
+    }
+    
+    main {
+        margin-left: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        break-inside: avoid;
+        margin-bottom: 1rem;
+    }
+    
+    .metrics-grid,
+    .trees-grid,
+    .activity-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .map-view {
+        height: 300px;
+        background: #f0f0f0;
+        border: 1px solid #ddd;
+    }
+    
+    .chart-container {
+        page-break-inside: avoid;
+    }
+}

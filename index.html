@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FincaLimón - Gestión Agrícola</title>
+    
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div class="text-center">
+            <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center mx-auto mb-4 animate-pulse">
+                <i data-lucide="tree-pine" class="h-8 w-8 text-white"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">FincaLimón</h2>
+            <p class="text-gray-600 mb-4">Cargando aplicación...</p>
+            <div class="w-32 h-2 bg-gray-200 rounded-full mx-auto">
+                <div class="h-2 bg-green-500 rounded-full animate-pulse" style="width: 60%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app" class="min-h-screen flex" style="display: none;">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar bg-white shadow-xl transition-all duration-300 relative">
+            <!-- Sidebar Header -->
+            <div class="p-4 border-b border-gray-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                        <i data-lucide="tree-pine" class="h-6 w-6 text-white"></i>
+                    </div>
+                    <div class="sidebar-text">
+                        <h1 class="font-bold text-xl text-gray-800">FincaLimón</h1>
+                        <p class="text-sm text-gray-500">Gestión Agrícola</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation Menu -->
+            <nav class="p-4 space-y-2">
+                <button data-section="dashboard" class="nav-item w-full flex items-center gap-3 p-3 rounded-lg transition-colors active">
+                    <i data-lucide="home" class="h-5 w-5"></i>
+                    <span class="sidebar-text font-medium">Panel Principal</span>
+                </button>
+                
+                <button data-section="trees" class="nav-item w-full flex items-center gap-3 p-3 rounded-lg transition-colors">
+                    <i data-lucide="tree-pine" class="h-5 w-5"></i>
+                    <span class="sidebar-text font-medium">Árboles</span>
+                </button>
+                
+                <button data-section="harvest" class="nav-item w-full flex items-center gap-3 p-3 rounded-lg transition-colors">
+                    <i data-lucide="scissors" class="h-5 w-5"></i>
+                    <span class="sidebar-text font-medium">Cosechas</span>
+                </button>
+                
+                <button data-section="fertilizer" class="nav-item w-full flex items-center gap-3 p-3 rounded-lg transition-colors">
+                    <i data-lucide="droplets" class="h-5 w-5"></i>
+                    <span class="sidebar-text font-medium">Abonos</span>
+                </button>
+                
+                <button data-section="spray" class="nav-item w-full flex items-center gap-3 p-3 rounded-lg transition-colors">
+                    <i data-lucide="bug" class="h-5 w-5"></i>
+                    <span class="sidebar-text font-medium">Fumigaciones</span>
+                </button>
+                
+                <button data-section="analytics" class="nav-item w-full flex items-center gap-3 p-3 rounded-lg transition-colors">
+                    <i data-lucide="bar-chart-3" class="h-5 w-5"></i>
+                    <span class="sidebar-text font-medium">Productividad</span>
+                </button>
+                
+                <button data-section="map" class="nav-item w-full flex items-center gap-3 p-3 rounded-lg transition-colors">
+                    <i data-lucide="map-pin" class="h-5 w-5"></i>
+                    <span class="sidebar-text font-medium">Mapa GPS</span>
+                </button>
+                
+                <button data-section="calendar" class="nav-item w-full flex items-center gap-3 p-3 rounded-lg transition-colors">
+                    <i data-lucide="calendar" class="h-5 w-5"></i>
+                    <span class="sidebar-text font-medium">Calendario</span>
+                </button>
+            </nav>
+            
+            <!-- Sidebar Toggle Button -->
+            <button id="sidebar-toggle" class="absolute -right-3 top-20 bg-white border-2 border-gray-200 rounded-full p-1 hover:bg-gray-50 transition-colors">
+                <i data-lucide="menu" class="h-4 w-4"></i>
+            </button>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-hidden">
+            <!-- Top Header -->
+            <header class="bg-white border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 id="page-title" class="text-2xl font-bold text-gray-800">Panel Principal</h2>
+                        <p id="page-subtitle" class="text-sm text-gray-600">Resumen general de tu finca de limones</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-4">
+                        <!-- Weather Widget -->
+                        <div class="hidden md:flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-lg">
+                            <i data-lucide="sun" class="h-5 w-5 text-blue-600"></i>
+                            <span class="text-sm font-medium text-blue-800">24°C - Soleado</span>
+                        </div>
+                        
+                        <!-- Notifications -->
+                        <button id="notifications-btn" class="relative p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
+                            <i data-lucide="bell" class="h-6 w-6"></i>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">2</span>
+                        </button>
+                        
+                        <!-- Settings -->
+                        <button class="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
+                            <i data-lucide="settings" class="h-6 w-6"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content Container -->
+            <div class="p-6 h-full overflow-y-auto">
+                <div class="max-w-7xl mx-auto">
+                    <!-- Dynamic Content Area -->
+                    <div id="content-area">
+                        <div class="text-center py-12">
+                            <div class="text-6xl mb-4">🌿</div>
+                            <h1 class="text-3xl font-bold text-gray-800 mb-2">Bienvenido a FincaLimón</h1>
+                            <p class="text-gray-600">Tu sistema de gestión agrícola está listo</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Container -->
+    <div id="modal-container" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <!-- Modal content will be inserted here -->
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 space-y-3">
+        <!-- Toast notifications will appear here -->
+    </div>
+
+    <script>
+        // === CONSTANTS.JS (SIN EXPORT) ===
+        const STORAGE_KEYS = {
+            TREES: 'fincalimon_trees',
+            ACTIVITIES: 'fincalimon_activities',
+            HARVESTS: 'fincalimon_harvests',
+            USER_SETTINGS: 'fincalimon_settings',
+            PRODUCTS: 'fincalimon_products',
+            CALENDAR_EVENTS: 'fincalimon_calendar'
+        };
+
+        const ROUTES = {
+            dashboard: { name: 'dashboard', title: 'Panel Principal' },
+            trees: { name: 'trees', title: 'Árboles' }, 
+            activities: { name: 'activities', title: 'Actividades' },
+            harvest: { name: 'harvest', title: 'Cosechas' },
+            fertilizer: { name: 'fertilizer', title: 'Abonos' },
+            spray: { name: 'spray', title: 'Fumigaciones' },
+            analytics: { name: 'analytics', title: 'Productividad' },
+            map: { name: 'map', title: 'Mapa GPS' },
+            calendar: { name: 'calendar', title: 'Calendario' }
+        };
+
+        const APP_CONFIG = {
+            name: 'FincaLimón',
+            version: '1.0.0',
+            description: 'Sistema de Gestión Agrícola'
+        };
+
+        // === HELPERS.JS (SIN EXPORT) ===
+        const formatDate = (dateString, format = 'dd/mm/yyyy') => {
+            const date = new Date(dateString);
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            
+            switch (format) {
+                case 'dd/mm/yyyy':
+                    return `${day}/${month}/${year}`;
+                case 'yyyy-mm-dd':
+                    return `${year}-${month}-${day}`;
+                default:
+                    return `${day}/${month}/${year}`;
+            }
+        };
+
+        const formatNumber = (number, decimals = 2) => {
+            return Number(number).toFixed(decimals);
+        };
+
+        const generateId = () => {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        };
+
+        const showToast = (message, type = 'info', duration = 3000) => {
+            const toastContainer = document.getElementById('toast-container');
+            
+            const toast = document.createElement('div');
+            toast.className = `px-6 py-4 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300`;
+            
+            const colors = {
+                success: 'bg-green-600 text-white',
+                error: 'bg-red-600 text-white',
+                warning: 'bg-yellow-600 text-white',
+                info: 'bg-blue-600 text-white'
+            };
+            
+            toast.className += ` ${colors[type]}`;
+            toast.innerHTML = `
+                <div class="flex items-center">
+                    <span>${message}</span>
+                    <button class="ml-4 text-white hover:text-gray-200" onclick="this.parentElement.parentElement.remove()">
+                        ×
+                    </button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full');
+            }, 100);
+            
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        };
+
+        // === STORAGE.JS (SIN DUPLICADOS) ===
+        class StorageManager {
+            constructor() {
+                this.isAvailable = this.checkStorageAvailable();
+                if (!this.isAvailable) {
+                    console.warn('⚠️ localStorage no disponible, los datos no se guardarán');
+                }
+            }
+
+            checkStorageAvailable() {
+                try {
+                    const test = '__storage_test__';
+                    localStorage.setItem(test, test);
+                    localStorage.removeItem(test);
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            setItem(key, value) {
+                if (!this.isAvailable) return false;
+                
+                try {
+                    const serializedValue = JSON.stringify(value);
+                    localStorage.setItem(key, serializedValue);
+                    return true;
+                } catch (error) {
+                    console.error(`Error guardando ${key}:`, error);
+                    return false;
+                }
+            }
+
+            getItem(key, defaultValue = null) {
+                if (!this.isAvailable) return defaultValue;
+                
+                try {
+                    const item = localStorage.getItem(key);
+                    return item ? JSON.parse(item) : defaultValue;
+                } catch (error) {
+                    console.error(`Error cargando ${key}:`, error);
+                    return defaultValue;
+                }
+            }
+
+            // Métodos específicos para árboles
+            getTrees() {
+                return this.getItem(STORAGE_KEYS.TREES, []);
+            }
+
+            saveTrees(trees) {
+                const success = this.setItem(STORAGE_KEYS.TREES, trees);
+                if (success) {
+                    console.log(`💾 Guardados ${trees.length} árboles`);
+                }
+                return success;
+            }
+
+            // Métodos específicos para actividades
+            getActivities() {
+                return this.getItem(STORAGE_KEYS.ACTIVITIES, []);
+            }
+
+            saveActivities(activities) {
+                const success = this.setItem(STORAGE_KEYS.ACTIVITIES, activities);
+                if (success) {
+                    console.log(`💾 Guardadas ${activities.length} actividades`);
+                }
+                return success;
+            }
+
+            // Método para obtener todos los datos
+            getAllData() {
+                return {
+                    trees: this.getTrees(),
+                    activities: this.getActivities(),
+                    harvests: this.getItem(STORAGE_KEYS.HARVESTS, []),
+                    userSettings: this.getItem(STORAGE_KEYS.USER_SETTINGS, {})
+                };
+            }
+
+            saveAllData(data) {
+                const results = {};
+                
+                if (data.trees) {
+                    results.trees = this.saveTrees(data.trees);
+                }
+                
+                if (data.activities) {
+                    results.activities = this.saveActivities(data.activities);
+                }
+
+                return results;
+            }
+
+            generateId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            }
+        }
+
+        // === MOCK DATA (SIN EXPORT) ===
+        const mockData = {
+            trees: [
+                {
+                    id: generateId(),
+                    variety: 'Eureka',
+                    plantedDate: '2020-03-15',
+                    location: { lat: 14.6349, lng: -90.5069 },
+                    sector: 'A1',
+                    health: 'Excelente',
+                    productivity: 85,
+                    notes: 'Árbol joven con buen desarrollo'
+                },
+                {
+                    id: generateId(),
+                    variety: 'Lisbon',
+                    plantedDate: '2019-05-20',
+                    location: { lat: 14.6350, lng: -90.5070 },
+                    sector: 'A2',
+                    health: 'Bueno',
+                    productivity: 92,
+                    notes: 'Alta productividad, requiere poda'
+                }
+            ],
+            activities: [
+                {
+                    id: generateId(),
+                    type: 'cosecha',
+                    date: new Date().toISOString().split('T')[0],
+                    description: 'Cosecha matutina',
+                    quantity: 150,
+                    unit: 'kg'
+                }
+            ],
+            harvests: [],
+            userSettings: {
+                theme: 'light',
+                language: 'es',
+                notifications: true
+            }
+        };
+
+        function loadMockData() {
+            return Promise.resolve(mockData);
+        }
+
+        // === COMPONENTES (SIN EXPORT NI DUPLICADOS) ===
+        class Sidebar {
+            constructor(options) {
+                this.container = options.container;
+                this.onNavigate = options.onNavigate;
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+            }
+
+            bindEvents() {
+                document.addEventListener('click', (e) => {
+                    const navItem = e.target.closest('[data-section]');
+                    if (navItem) {
+                        e.preventDefault();
+                        const route = navItem.dataset.section;
+                        this.setActiveRoute(route);
+                        if (this.onNavigate) {
+                            this.onNavigate(route);
+                        }
+                    }
+                });
+            }
+
+            setActiveRoute(route) {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active', 'bg-green-100', 'text-green-600');
+                    item.classList.add('text-gray-700', 'hover:bg-gray-100');
+                });
+
+                const activeItem = document.querySelector(`[data-section="${route}"]`);
+                if (activeItem) {
+                    activeItem.classList.remove('text-gray-700', 'hover:bg-gray-100');
+                    activeItem.classList.add('active', 'bg-green-100', 'text-green-600');
+                }
+            }
+        }
+
+        class Dashboard {
+            constructor(options) {
+                this.container = options.container;
+                this.data = options.data;
+            }
+
+            render() {
+                const container = document.getElementById('content-area');
+                container.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <!-- Card Árboles -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm">Árboles Totales</p>
+                                    <p class="text-2xl font-bold text-gray-800">${this.data.trees?.length || 0}</p>
+                                </div>
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="tree-pine" class="h-6 w-6 text-green-600"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Actividades -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm">Actividades Hoy</p>
+                                    <p class="text-2xl font-bold text-gray-800">${this.data.activities?.length || 0}</p>
+                                </div>
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="activity" class="h-6 w-6 text-blue-600"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Productividad -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm">Productividad</p>
+                                    <p class="text-2xl font-bold text-gray-800">87%</p>
+                                </div>
+                                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="trending-up" class="h-6 w-6 text-yellow-600"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Cosecha -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm">Cosecha del Mes</p>
+                                    <p class="text-2xl font-bold text-gray-800">2,450 kg</p>
+                                </div>
+                                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="scissors" class="h-6 w-6 text-orange-600"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actividades Recientes -->
+                    <div class="bg-white rounded-xl shadow-sm border">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800">Actividades Recientes</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="text-center py-8 text-gray-500">
+                                <i data-lucide="calendar" class="h-12 w-12 mx-auto mb-4 text-gray-400"></i>
+                                <p>No hay actividades registradas</p>
+                                <button class="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                    Agregar Actividad
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Reinicializar iconos de Lucide
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
+
+            updateData(newData) {
+                this.data = newData;
+                this.render();
+            }
+        }
+
+        class Trees {
+            constructor(options) {
+                this.container = options.container;
+                this.data = options.data;
+                this.onDataUpdate = options.onDataUpdate;
+            }
+
+            render() {
+                const container = document.getElementById('content-area');
+                container.innerHTML = `
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between">
+                            <h1 class="text-2xl font-bold text-gray-800">Gestión de Árboles</h1>
+                            <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                <i data-lucide="plus" class="h-5 w-5 inline mr-2"></i>
+                                Agregar Árbol
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border">
+                        <div class="p-6">
+                            ${this.data.trees && this.data.trees.length > 0 ? this.renderTreesList() : this.renderEmptyState()}
+                        </div>
+                    </div>
+                `;
+
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
+
+            renderTreesList() {
+                return `
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${this.data.trees.map(tree => `
+                            <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="font-semibold text-gray-800">${tree.variety}</h3>
+                                    <span class="px-2 py-1 bg-green-100 text-green-600 rounded text-sm">${tree.health}</span>
+                                </div>
+                                <div class="space-y-2 text-sm text-gray-600">
+                                    <p><strong>Sector:</strong> ${tree.sector}</p>
+                                    <p><strong>Plantado:</strong> ${formatDate(tree.plantedDate)}</p>
+                                    <p><strong>Productividad:</strong> ${tree.productivity}%</p>
+                                </div>
+                                <div class="mt-4 flex gap-2">
+                                    <button class="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded">Editar</button>
+                                    <button class="text-red-600 hover:bg-red-50 px-2 py-1 rounded">Eliminar</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            renderEmptyState() {
+                return `
+                    <div class="text-center py-12">
+                        <i data-lucide="tree-pine" class="h-16 w-16 mx-auto mb-4 text-gray-400"></i>
+                        <h3 class="text-lg font-medium text-gray-800 mb-2">No hay árboles registrados</h3>
+                        <p class="text-gray-600 mb-6">Comienza agregando tu primer árbol de limón</p>
+                        <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">
+                            <i data-lucide="plus" class="h-5 w-5 inline mr-2"></i>
+                            Agregar Primer Árbol
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        class Activities {
+            constructor(options) {
+                this.container = options.container;
+                this.data = options.data;
+            }
+
+            render() {
+                const container = document.getElementById('content-area');
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <i data-lucide="activity" class="h-16 w-16 mx-auto mb-4 text-gray-400"></i>
+                        <h1 class="text-2xl font-bold text-gray-800 mb-2">Actividades</h1>
+                        <p class="text-gray-600">Gestiona las actividades de tu finca</p>
+                    </div>
+                `;
+
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
+        }
+
+        class Analytics {
+            constructor(options) {
+                this.container = options.container;
+                this.data = options.data;
+            }
+
+            render() {
+                const container = document.getElementById('content-area');
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <i data-lucide="bar-chart-3" class="h-16 w-16 mx-auto mb-4 text-gray-400"></i>
+                        <h1 class="text-2xl font-bold text-gray-800 mb-2">Productividad</h1>
+                        <p class="text-gray-600">Analiza el rendimiento de tu finca</p>
+                    </div>
+                `;
+
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
+
+            updateData(newData) {
+                this.data = newData;
+            }
+        }
+
+        class MapView {
+            constructor(options) {
+                this.container = options.container;
+                this.data = options.data;
+            }
+
+            render() {
+                const container = document.getElementById('content-area');
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <i data-lucide="map-pin" class="h-16 w-16 mx-auto mb-4 text-gray-400"></i>
+                        <h1 class="text-2xl font-bold text-gray-800 mb-2">Mapa GPS</h1>
+                        <p class="text-gray-600">Visualiza la ubicación de tus árboles</p>
+                    </div>
+                `;
+
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
+        }
+
+        class Calendar {
+            constructor(options) {
+                this.container = options.container;
+                this.data = options.data;
+            }
+
+            render() {
+                const container = document.getElementById('content-area');
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <i data-lucide="calendar" class="h-16 w-16 mx-auto mb-4 text-gray-400"></i>
+                        <h1 class="text-2xl font-bold text-gray-800 mb-2">Calendario</h1>
+                        <p class="text-gray-600">Programa y organiza tus actividades</p>
+                    </div>
+                `;
+
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
+        }
+
+        // === APLICACIÓN PRINCIPAL (SIN EXPORT NI DUPLICADOS) ===
+        class FincaLimonApp {
+            constructor() {
+                this.currentRoute = 'dashboard';
+                this.components = {};
+                this.data = {
+                    trees: [],
+                    activities: [],
+                    harvests: [],
+                    user: null
+                };
+                
+                this.storageManager = new StorageManager();
+                this.init();
+            }
+
+            async init() {
+                try {
+                    console.log('🌱 Iniciando FincaLimón...');
+                    
+                    // Cargar datos iniciales
+                    await this.loadInitialData();
+                    
+                    // Inicializar componentes
+                    this.initializeComponents();
+                    
+                    // Configurar navegación
+                    this.setupNavigation();
+                    
+                    // Configurar eventos globales
+                    this.setupGlobalEvents();
+                    
+                    // Cargar ruta inicial
+                    this.navigateToRoute(this.getCurrentRoute());
+                    
+                    // Ocultar loading screen y mostrar app
+                    setTimeout(() => {
+                        document.getElementById('loading-screen').style.display = 'none';
+                        document.getElementById('app').style.display = 'flex';
+                    }, 1000);
+                    
+                    console.log('✅ FincaLimón App iniciada correctamente');
+                    showToast('¡Aplicación cargada correctamente!', 'success');
+                    
+                } catch (error) {
+                    console.error('❌ Error iniciando la aplicación:', error);
+                    this.showError('Error al inicializar la aplicación');
+                }
+            }
+
+            async loadInitialData() {
+                // Intentar cargar datos del localStorage primero
+                const savedData = this.storageManager.getAllData();
+                
+                if (savedData.trees && savedData.trees.length > 0) {
+                    this.data = savedData;
+                    console.log('📊 Datos cargados desde localStorage');
+                } else {
+                    // Si no hay datos guardados, cargar datos mock
+                    this.data = await loadMockData();
+                    // Guardar datos mock en localStorage
+                    this.storageManager.saveAllData(this.data);
+                    console.log('📊 Datos iniciales cargados (mock data)');
+                }
+            }
+
+            initializeComponents() {
+                // Inicializar sidebar
+                this.components.sidebar = new Sidebar({
+                    container: '#sidebar',
+                    onNavigate: (route) => this.navigateToRoute(route)
+                });
+
+                // Inicializar componentes de contenido
+                this.components.dashboard = new Dashboard({
+                    container: '#content-area',
+                    data: this.data
+                });
+
+                this.components.trees = new Trees({
+                    container: '#content-area',
+                    data: this.data,
+                    onDataUpdate: (newData) => this.updateData(newData)
+                });
+
+                this.components.activities = new Activities({
+                    container: '#content-area',
+                    data: this.data,
+                    onDataUpdate: (newData) => this.updateData(newData)
+                });
+
+                this.components.harvest = new Activities({
+                    container: '#content-area',
+                    data: this.data
+                });
+
+                this.components.fertilizer = new Activities({
+                    container: '#content-area',
+                    data: this.data
+                });
+
+                this.components.spray = new Activities({
+                    container: '#content-area',
+                    data: this.data
+                });
+
+                this.components.analytics = new Analytics({
+                    container: '#content-area',
+                    data: this.data
+                });
+
+                this.components.map = new MapView({
+                    container: '#content-area',
+                    data: this.data
+                });
+
+                this.components.calendar = new Calendar({
+                    container: '#content-area',
+                    data: this.data
+                });
+
+                console.log('🔧 Componentes inicializados');
+            }
+
+            setupNavigation() {
+                // Navegación por hash
+                window.addEventListener('hashchange', () => {
+                    const route = this.getCurrentRoute();
+                    this.navigateToRoute(route);
+                });
+
+                // Navegación por botones del sidebar - ya manejado en Sidebar class
+                console.log('🧭 Navegación configurada');
+            }
+
+            setupGlobalEvents() {
+                // Manejo de errores globales
+                window.addEventListener('error', (e) => {
+                    console.error('Error global:', e.error);
+                    this.showError('Ha ocurrido un error inesperado');
+                });
+
+                // Guardar datos antes de cerrar
+                window.addEventListener('beforeunload', () => {
+                    this.storageManager.saveAllData(this.data);
+                });
+
+                // Responsive sidebar toggle
+                const sidebarToggle = document.getElementById('sidebar-toggle');
+                if (sidebarToggle) {
+                    sidebarToggle.addEventListener('click', () => {
+                        this.toggleSidebar();
+                    });
+                }
+
+                console.log('🎛️ Eventos globales configurados');
+            }
+
+            getCurrentRoute() {
+                const hash = window.location.hash.slice(1);
+                return hash || 'dashboard';
+            }
+
+            navigateToRoute(route) {
+                // Validar que la ruta existe
+                if (!ROUTES[route]) {
+                    console.warn(`Ruta no encontrada: ${route}`);
+                    route = 'dashboard';
+                }
+
+                // Actualizar hash si es necesario
+                if (window.location.hash.slice(1) !== route) {
+                    window.location.hash = route;
+                }
+
+                // Actualizar estado actual
+                this.currentRoute = route;
+
+                // Actualizar sidebar
+                this.components.sidebar.setActiveRoute(route);
+
+                // Actualizar título de página
+                this.updatePageTitle(route);
+
+                // Renderizar componente correspondiente
+                this.renderCurrentComponent();
+
+                console.log(`📍 Navegando a: ${route}`);
+            }
+
+            updatePageTitle(route) {
+                const titles = {
+                    dashboard: { title: 'Panel Principal', subtitle: 'Resumen general de tu finca de limones' },
+                    trees: { title: 'Gestión de Árboles', subtitle: 'Administra tus árboles de limón' },
+                    harvest: { title: 'Registro de Cosechas', subtitle: 'Controla la producción de limones' },
+                    fertilizer: { title: 'Control de Abonos', subtitle: 'Gestiona la fertilización' },
+                    spray: { title: 'Control de Fumigaciones', subtitle: 'Manejo de plagas y enfermedades' },
+                    analytics: { title: 'Análisis de Productividad', subtitle: 'Estadísticas y reportes' },
+                    map: { title: 'Mapa GPS', subtitle: 'Ubicación de árboles y sectores' },
+                    calendar: { title: 'Calendario de Actividades', subtitle: 'Planifica tus tareas agrícolas' }
+                };
+
+                const pageInfo = titles[route] || titles.dashboard;
+                document.getElementById('page-title').textContent = pageInfo.title;
+                document.getElementById('page-subtitle').textContent = pageInfo.subtitle;
+                document.title = `${pageInfo.title} - FincaLimón`;
+            }
+
+            renderCurrentComponent() {
+                const component = this.components[this.currentRoute];
+                if (component && typeof component.render === 'function') {
+                    component.render();
+                } else {
+                    console.error(`Componente no encontrado para la ruta: ${this.currentRoute}`);
+                    this.renderNotFound();
+                }
+            }
+
+            renderNotFound() {
+                const container = document.getElementById('content-area');
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-64 text-center">
+                        <div class="text-6xl mb-4">🌿</div>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Página no encontrada</h2>
+                        <p class="text-gray-600 mb-4">La página que buscas no existe.</p>
+                        <button onclick="window.app.navigateToRoute('dashboard')" 
+                                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                            Ir al Dashboard
+                        </button>
+                    </div>
+                `;
+            }
+
+            updateData(newData) {
+                // Actualizar datos en memoria
+                this.data = { ...this.data, ...newData };
+                
+                // Guardar en localStorage
+                this.storageManager.saveAllData(this.data);
+                
+                // Notificar a componentes que dependen de los datos
+                this.notifyDataUpdate();
+                
+                console.log('📊 Datos actualizados:', Object.keys(newData));
+            }
+
+            notifyDataUpdate() {
+                // Actualizar componentes que muestran estadísticas
+                if (this.components.dashboard) {
+                    this.components.dashboard.updateData(this.data);
+                }
+                if (this.components.analytics) {
+                    this.components.analytics.updateData(this.data);
+                }
+            }
+
+            toggleSidebar() {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.toggle('sidebar-open');
+            }
+
+            showError(message) {
+                showToast(message, 'error', 5000);
+            }
+
+            showSuccess(message) {
+                showToast(message, 'success', 3000);
+            }
+
+            // Métodos públicos para interactuar con la app
+            getData() {
+                return { ...this.data };
+            }
+
+            getCurrentComponent() {
+                return this.components[this.currentRoute];
+            }
+
+            refresh() {
+                this.renderCurrentComponent();
+            }
+        }
+
+        // Inicializar la aplicación cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', () => {
+            // Crear instancia global de la aplicación
+            window.app = new FincaLimonApp();
+
+            // Initialize Lucide icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+    </script>
+
+    <!-- CSS adicional para sidebar responsive -->
+    <style>
+        .sidebar {
+            width: 280px;
+            z-index: 30;
+        }
+
+        .sidebar-open {
+            transform: translateX(0);
+        }
+
+        .nav-item.active {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+
+        .nav-item:hover:not(.active) {
+            background-color: #f3f4f6;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.sidebar-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-text {
+                display: block;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .sidebar {
+                position: relative;
+                transform: translateX(0);
+            }
+        }
+
+        /* Loading animation */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: .5;
+            }
+        }
+
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</body>
+</html>
