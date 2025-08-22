@@ -1,0 +1,40 @@
+:root{
+  --verde-limon:#7CB342; --verde-hoja:#388E3C; --amarillo-sol:#FFB300; --azul-cielo:#1976D2;
+  --gris-claro:#F5F5F5; --gris-oscuro:#424242; --texto:#212121; --blanco:#fff;
+}
+
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;color:var(--texto);background:linear-gradient(135deg,#7CB342 0%,#388E3C 100%);min-height:100vh}
+
+.dashboard{padding:16px}
+.welcome-header{color:#fff;text-align:center;margin:12px 0 20px}
+.welcome-header h1{margin:0 0 4px 0}
+.welcome-subtitle{opacity:.9;margin:0}
+
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.stat-card{background:#fff;border-radius:12px;padding:18px;text-align:center;border-left:4px solid var(--verde-limon);box-shadow:0 4px 8px rgba(0,0,0,.08)}
+.stat-number{font-size:28px;font-weight:800;color:var(--verde-hoja)}
+.stat-label{font-size:12px;color:var(--gris-oscuro);text-transform:uppercase;letter-spacing:.5px}
+
+.action-buttons{display:flex;flex-direction:column;gap:12px}
+.primary-button,.secondary-button{display:inline-flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;border:none;border-radius:10px;padding:14px 18px;font-weight:700;cursor:pointer}
+.primary-button{background:var(--amarillo-sol);color:#fff;box-shadow:0 2px 8px rgba(255,179,0,.3)}
+.secondary-buttons{display:flex;gap:12px}
+.secondary-button{flex:1;background:#fff;color:var(--verde-hoja);border:2px solid var(--verde-limon)}
+.button-icon{font-size:20px}
+
+/* Conectividad */
+.connectivity-indicator{position:fixed;top:16px;right:16px;z-index:1000;display:flex;align-items:center;color:#fff;padding:8px 12px;border-radius:20px;font-size:12px;font-weight:800}
+.connectivity-online{background:rgba(76,175,80,.9)}
+.connectivity-offline{background:rgba(244,67,54,.9)}
+.connectivity-syncing{background:rgba(255,152,0,.9)}
+.connectivity-dot{width:8px;height:8px;border-radius:50%;margin-right:8px;background:#fff;animation:pulse 2s infinite}
+.pending-badge{margin-left:8px;background:#0003;color:#fff;border-radius:10px;padding:2px 6px;font-size:10px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* Responsive */
+@media (max-width:360px){.stats-grid{grid-template-columns:1fr}.stat-number{font-size:24px}}
+@media (prefers-color-scheme:dark){
+  body{background:linear-gradient(135deg,#2e5c2e 0%,#1a3a1a 100%)}
+  .stat-card{background:#1e1e1e;color:#fff}
+}
