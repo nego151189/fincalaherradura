@@ -5,14 +5,14 @@
 */
 (function () {
   var LINKS = [
-    { href: "/index.html",       icon: "🏠", label: "Inicio" },
-    { href: "/produccion.html",  icon: "🌿", label: "Cosecha" },
-    { href: "/riegos.html",      icon: "💧", label: "Riego" },
-    { href: "/precios.html",     icon: "💰", label: "Precios" },
-    { href: "/ventas.html",      icon: "🧾", label: "Ventas" },
-    { href: "/gastos.html",      icon: "📉", label: "Gastos" },
-    { href: "/tratamientos.html",icon: "🧪", label: "Tratam." },
-    { href: "/arboles.html",     icon: "🌳", label: "Árboles" }
+    { href: "index.html",       icon: "🏠", label: "Inicio" },
+    { href: "produccion.html",  icon: "🌿", label: "Cosecha" },
+    { href: "riegos.html",      icon: "💧", label: "Riego" },
+    { href: "precios.html",     icon: "💰", label: "Precios" },
+    { href: "ventas.html",      icon: "🧾", label: "Ventas" },
+    { href: "gastos.html",      icon: "📉", label: "Gastos" },
+    { href: "tratamientos.html",icon: "🧪", label: "Tratam." },
+    { href: "arboles.html",     icon: "🌳", label: "Árboles" }
   ];
 
   function isActive(href) {
@@ -44,3 +44,4 @@
     render();
   }
 })();
+
