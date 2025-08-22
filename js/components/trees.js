@@ -1,7 +1,8 @@
-// trees.js - Gestión de Árboles FincaLimón
+// trees.js - Gestión de Árboles FincaLimón (VERSIÓN CORREGIDA)
 class Trees {
-    constructor() {
-        this.storage = new Storage();
+    constructor(options = {}) {
+        this.container = options.container || '#content-area';
+        this.storage = window.StorageManager || null;
         this.currentFilter = 'all';
         this.currentSort = 'id';
         this.selectedTrees = new Set();
@@ -13,24 +14,35 @@ class Trees {
     }
 
     bindEvents() {
+        // Usar event delegation para manejar clicks dinámicamente
         document.addEventListener('click', (e) => {
-            if (e.target.matches('.tree-card')) {
-                this.selectTree(e.target.dataset.treeId);
-            }
-            if (e.target.matches('.add-tree-btn')) {
+            if (e.target.closest('.add-tree-btn')) {
                 this.showAddTreeModal();
+                return;
             }
-            if (e.target.matches('.edit-tree-btn')) {
-                this.showEditTreeModal(e.target.dataset.treeId);
+            
+            if (e.target.closest('.edit-tree-btn')) {
+                const treeId = e.target.closest('.edit-tree-btn').dataset.treeId;
+                this.showEditTreeModal(treeId);
+                return;
             }
-            if (e.target.matches('.delete-tree-btn')) {
-                this.deleteTree(e.target.dataset.treeId);
+            
+            if (e.target.closest('.delete-tree-btn')) {
+                const treeId = e.target.closest('.delete-tree-btn').dataset.treeId;
+                this.deleteTree(treeId);
+                return;
             }
-            if (e.target.matches('.filter-btn')) {
-                this.setFilter(e.target.dataset.filter);
+            
+            if (e.target.closest('.filter-btn')) {
+                const filter = e.target.closest('.filter-btn').dataset.filter;
+                this.setFilter(filter);
+                return;
             }
-            if (e.target.matches('.sort-btn')) {
-                this.setSort(e.target.dataset.sort);
+            
+            if (e.target.closest('.tree-card')) {
+                const treeId = e.target.closest('.tree-card').dataset.treeId;
+                this.selectTree(treeId);
+                return;
             }
         });
 
@@ -38,11 +50,29 @@ class Trees {
             if (e.target.matches('#search-trees')) {
                 this.filterTrees(e.target.value);
             }
+            
+            if (e.target.matches('.sort-select')) {
+                this.setSort(e.target.value);
+            }
         });
     }
 
-    render() {
-        const trees = this.getFilteredTrees();
+    async getTreesData() {
+        try {
+            if (this.storage) {
+                return await this.storage.getTrees();
+            }
+            
+            // Fallback a datos mock si no hay storage
+            return window.mockData?.trees || [];
+        } catch (error) {
+            console.error('Error obteniendo árboles:', error);
+            return [];
+        }
+    }
+
+    async render() {
+        const trees = await this.getTreesData();
         
         return `
             <div class="trees-container p-6">
@@ -51,13 +81,13 @@ class Trees {
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between">
                         <div>
                             <h1 class="text-3xl font-bold text-gray-800 mb-2">
-                                <i class="lucide lucide-tree-palm mr-3"></i>
+                                <i data-lucide="tree-pine" class="mr-3"></i>
                                 Gestión de Árboles
                             </h1>
                             <p class="text-gray-600">Administra y monitorea todos tus árboles de limón</p>
                         </div>
                         <button class="add-tree-btn bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors mt-4 md:mt-0">
-                            <i class="lucide lucide-plus mr-2"></i>
+                            <i data-lucide="plus" class="mr-2"></i>
                             Agregar Árbol
                         </button>
                     </div>
@@ -74,7 +104,7 @@ class Trees {
                                        id="search-trees" 
                                        placeholder="Buscar por ID, variedad o sector..."
                                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                                <i class="lucide lucide-search absolute left-3 top-2.5 h-5 w-5 text-gray-400"></i>
+                                <i data-lucide="search" class="absolute left-3 top-2.5 h-5 w-5 text-gray-400"></i>
                             </div>
                         </div>
 
@@ -187,16 +217,16 @@ class Trees {
                     <!-- Información Básica -->
                     <div class="space-y-3 mb-4">
                         <div class="flex items-center text-sm text-gray-600">
-                            <i class="lucide lucide-sprout h-4 w-4 mr-2"></i>
+                            <i data-lucide="sprout" class="h-4 w-4 mr-2"></i>
                             <span>${tree.variety}</span>
                         </div>
                         <div class="flex items-center text-sm text-gray-600">
-                            <i class="lucide lucide-map-pin h-4 w-4 mr-2"></i>
+                            <i data-lucide="map-pin" class="h-4 w-4 mr-2"></i>
                             <span>Sector ${tree.location.sector}</span>
                         </div>
                         <div class="flex items-center text-sm text-gray-600">
-                            <i class="lucide lucide-calendar h-4 w-4 mr-2"></i>
-                            <span>Plantado: ${formatDate(tree.plantedDate)}</span>
+                            <i data-lucide="calendar" class="h-4 w-4 mr-2"></i>
+                            <span>Plantado: ${this.formatDate(tree.plantedDate)}</span>
                         </div>
                     </div>
 
@@ -224,7 +254,7 @@ class Trees {
 
                     <!-- Coordenadas GPS -->
                     <div class="mb-4 text-xs text-gray-500">
-                        <i class="lucide lucide-map h-3 w-3 mr-1"></i>
+                        <i data-lucide="map" class="h-3 w-3 mr-1"></i>
                         GPS: ${tree.location.coordinates.lat.toFixed(6)}, ${tree.location.coordinates.lng.toFixed(6)}
                     </div>
 
@@ -232,12 +262,12 @@ class Trees {
                     <div class="flex space-x-2">
                         <button class="edit-tree-btn flex-1 bg-blue-50 text-blue-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors"
                                 data-tree-id="${tree.id}">
-                            <i class="lucide lucide-edit-2 h-4 w-4 mr-1"></i>
+                            <i data-lucide="edit-2" class="h-4 w-4 mr-1"></i>
                             Editar
                         </button>
                         <button class="delete-tree-btn bg-red-50 text-red-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors"
                                 data-tree-id="${tree.id}">
-                            <i class="lucide lucide-trash-2 h-4 w-4"></i>
+                            <i data-lucide="trash-2" class="h-4 w-4"></i>
                         </button>
                     </div>
                 </div>
@@ -249,11 +279,11 @@ class Trees {
         return `
             <div class="empty-state text-center py-16">
                 <div class="max-w-md mx-auto">
-                    <i class="lucide lucide-tree-palm h-24 w-24 mx-auto text-gray-300 mb-6"></i>
+                    <i data-lucide="tree-pine" class="h-24 w-24 mx-auto text-gray-300 mb-6"></i>
                     <h3 class="text-xl font-semibold text-gray-600 mb-4">No se encontraron árboles</h3>
                     <p class="text-gray-500 mb-8">Comienza agregando tu primer árbol de limón para gestionar tu finca.</p>
                     <button class="add-tree-btn bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
-                        <i class="lucide lucide-plus mr-2"></i>
+                        <i data-lucide="plus" class="mr-2"></i>
                         Agregar Primer Árbol
                     </button>
                 </div>
@@ -265,11 +295,11 @@ class Trees {
         return `
             <div class="modal-header flex items-center justify-between mb-6">
                 <h2 class="text-2xl font-bold text-gray-800">
-                    <i class="lucide lucide-tree-palm mr-3"></i>
+                    <i data-lucide="tree-pine" class="mr-3"></i>
                     <span id="modal-title">Agregar Nuevo Árbol</span>
                 </h2>
                 <button class="modal-close text-gray-400 hover:text-gray-600">
-                    <i class="lucide lucide-x h-6 w-6"></i>
+                    <i data-lucide="x" class="h-6 w-6"></i>
                 </button>
             </div>
 
@@ -382,9 +412,14 @@ class Trees {
         `;
     }
 
+    formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-GT');
+    }
+
     // Métodos de filtrado y ordenamiento
-    getFilteredTrees() {
-        let trees = this.storage.getTrees();
+    async getFilteredTrees() {
+        let trees = await this.getTreesData();
         
         // Aplicar filtro de búsqueda
         const searchTerm = document.getElementById('search-trees')?.value?.toLowerCase() || '';
@@ -447,33 +482,72 @@ class Trees {
 
     // Métodos CRUD
     showAddTreeModal() {
+        console.log('Mostrando modal para agregar árbol');
+        
         const modal = document.getElementById('tree-modal');
+        if (!modal) {
+            console.error('Modal no encontrado');
+            return;
+        }
+        
         const form = document.getElementById('tree-form');
         const title = document.getElementById('modal-title');
         const submitText = document.getElementById('submit-text');
         
         title.textContent = 'Agregar Nuevo Árbol';
         submitText.textContent = 'Guardar Árbol';
-        form.reset();
+        
+        if (form) form.reset();
         document.getElementById('tree-id').value = '';
         
         // Generar próximo ID automáticamente
-        const trees = this.storage.getTrees();
-        const nextId = this.generateNextTreeId(trees);
-        document.getElementById('tree-code').value = nextId;
+        this.generateNextTreeId().then(nextId => {
+            document.getElementById('tree-code').value = nextId;
+        });
         
         modal.classList.remove('hidden');
         this.bindModalEvents();
+        
+        // Inicializar iconos de Lucide
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
     }
 
-    showEditTreeModal(treeId) {
+    async generateNextTreeId() {
+        try {
+            const trees = await this.getTreesData();
+            if (trees.length === 0) return 'L001';
+            
+            const numbers = trees
+                .filter(t => t.id && t.id.startsWith('L'))
+                .map(t => {
+                    const numStr = t.id.substring(1);
+                    return parseInt(numStr) || 0;
+                })
+                .filter(n => !isNaN(n));
+                
+            const maxNumber = Math.max(0, ...numbers);
+            return `L${(maxNumber + 1).toString().padStart(3, '0')}`;
+        } catch (error) {
+            console.error('Error generando ID:', error);
+            return 'L001';
+        }
+    }
+
+    async showEditTreeModal(treeId) {
         const modal = document.getElementById('tree-modal');
         const form = document.getElementById('tree-form');
         const title = document.getElementById('modal-title');
         const submitText = document.getElementById('submit-text');
-        const tree = this.storage.getTrees().find(t => t.id === treeId);
         
-        if (!tree) return;
+        const trees = await this.getTreesData();
+        const tree = trees.find(t => t.id === treeId);
+        
+        if (!tree) {
+            console.error('Árbol no encontrado:', treeId);
+            return;
+        }
         
         title.textContent = 'Editar Árbol';
         submitText.textContent = 'Actualizar Árbol';
@@ -493,11 +567,18 @@ class Trees {
         
         modal.classList.remove('hidden');
         this.bindModalEvents();
+        
+        // Inicializar iconos de Lucide
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
     }
 
     bindModalEvents() {
         const modal = document.getElementById('tree-modal');
         const form = document.getElementById('tree-form');
+        
+        if (!modal || !form) return;
         
         // Cerrar modal
         modal.querySelectorAll('.modal-close').forEach(btn => {
@@ -518,11 +599,8 @@ class Trees {
         };
     }
 
-    saveTree() {
-        const form = document.getElementById('tree-form');
-        const formData = new FormData(form);
-        
-        const treeData = {
+    async saveTree() {
+        const formData = {
             id: document.getElementById('tree-code').value,
             variety: document.getElementById('tree-variety').value,
             plantedDate: document.getElementById('planted-date').value,
@@ -541,41 +619,50 @@ class Trees {
         
         const existingId = document.getElementById('tree-id').value;
         
-        if (existingId && existingId !== treeData.id) {
-            // Actualizando árbol existente
-            this.storage.updateTree(existingId, treeData);
-            showNotification('Árbol actualizado correctamente', 'success');
-        } else if (!existingId) {
-            // Agregando nuevo árbol
-            this.storage.addTree(treeData);
-            showNotification('Nuevo árbol agregado correctamente', 'success');
+        try {
+            if (this.storage) {
+                if (existingId && existingId !== formData.id) {
+                    // Actualizando árbol existente
+                    await this.storage.updateTree(existingId, formData);
+                    this.showNotification('Árbol actualizado correctamente', 'success');
+                } else if (!existingId) {
+                    // Agregando nuevo árbol
+                    await this.storage.addTree(formData);
+                    this.showNotification('Nuevo árbol agregado correctamente', 'success');
+                }
+            } else {
+                console.log('Datos del árbol (simulación):', formData);
+                this.showNotification('Árbol guardado (modo simulación)', 'info');
+            }
+            
+            document.getElementById('tree-modal').classList.add('hidden');
+            this.refreshView();
+            
+        } catch (error) {
+            console.error('Error guardando árbol:', error);
+            this.showNotification('Error al guardar el árbol', 'error');
         }
-        
-        document.getElementById('tree-modal').classList.add('hidden');
-        this.refreshView();
     }
 
-    deleteTree(treeId) {
+    async deleteTree(treeId) {
         if (confirm('¿Estás seguro de que quieres eliminar este árbol? Esta acción no se puede deshacer.')) {
-            this.storage.deleteTree(treeId);
-            showNotification('Árbol eliminado correctamente', 'success');
-            this.refreshView();
+            try {
+                if (this.storage) {
+                    await this.storage.deleteTree(treeId);
+                    this.showNotification('Árbol eliminado correctamente', 'success');
+                } else {
+                    console.log('Eliminando árbol (simulación):', treeId);
+                    this.showNotification('Árbol eliminado (modo simulación)', 'info');
+                }
+                this.refreshView();
+            } catch (error) {
+                console.error('Error eliminando árbol:', error);
+                this.showNotification('Error al eliminar el árbol', 'error');
+            }
         }
     }
 
     // Métodos auxiliares
-    generateNextTreeId(trees) {
-        if (trees.length === 0) return 'L001';
-        
-        const numbers = trees
-            .filter(t => t.id.startsWith('L'))
-            .map(t => parseInt(t.id.substring(1)))
-            .filter(n => !isNaN(n));
-            
-        const maxNumber = Math.max(0, ...numbers);
-        return `L${(maxNumber + 1).toString().padStart(3, '0')}`;
-    }
-
     getHealthColor(health) {
         const colors = {
             'Excelente': 'green',
@@ -592,13 +679,30 @@ class Trees {
         } else {
             this.selectedTrees.add(treeId);
         }
-        // Aquí puedes agregar lógica para mostrar acciones en lote
     }
 
-    refreshView() {
-        const content = document.getElementById('main-content');
-        if (content && content.innerHTML.includes('trees-container')) {
-            content.innerHTML = this.render();
+    showNotification(message, type = 'info') {
+        // Usar la función showToast global si existe
+        if (typeof showToast === 'function') {
+            showToast(message, type);
+        } else {
+            // Implementación de fallback
+            console.log(`${type.toUpperCase()}: ${message}`);
+            alert(message);
+        }
+    }
+
+    async refreshView() {
+        const container = document.querySelector(this.container);
+        if (container) {
+            container.innerHTML = await this.render();
+            // Volver a vincular eventos después de renderizar
+            this.bindEvents();
+            
+            // Inicializar iconos de Lucide
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
         }
     }
 }
