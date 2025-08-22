@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Ventas · Finca La Herradura</title>
+  <link rel="stylesheet" href="./css/main.css" />
+  <link rel="manifest" href="/manifest.json" />
+</head>
+<body>
+  <!-- Indicador de conectividad -->
+  <div id="connectivityIndicator" class="connectivity-indicator offline" aria-live="polite">
+    <span class="connectivity-dot"></span>
+    <span id="connectivityText">Sin Internet</span>
+    <span id="pendingBadge" class="pending-badge hidden">0</span>
+  </div>
+
+  <main class="page sales-page">
+    <header class="page-header">
+      <h1>💰 Ventas directas</h1>
+      <p class="subtitle">Cliente · unidades · precio por unidad · forma de pago</p>
+    </header>
+
+    <!-- KPIs del día -->
+    <section class="stats-section">
+      <div class="stat-card">
+        <div class="stat-number" id="kpiSalesCount">0</div>
+        <div class="stat-label">Ventas hoy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="kpiUnitsSold">0</div>
+        <div class="stat-label">Unidades vendidas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="kpiRevenue">Q0</div>
+        <div class="stat-label">Ingresos hoy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="kpiAvgPrice">Q0.00</div>
+        <div class="stat-label">Precio promedio</div>
+      </div>
+    </section>
+
+    <!-- Formulario de venta -->
+    <section class="form-section">
+      <div class="card">
+        <div class="card-header">
+          <h2>🧾 Registrar venta</h2>
+        </div>
+        <div class="card-body">
+          <div class="row two-col">
+            <div>
+              <label class="label" for="clientName">Cliente</label>
+              <input id="clientName" class="input" type="text" placeholder="Ej. Mercado Zona 4" />
+            </div>
+            <div>
+              <label class="label" for="quality">Calidad</label>
+              <select id="quality" class="select">
+                <option value="primera">Primera</option>
+                <option value="segunda">Segunda</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row three-col">
+            <div>
+              <label class="label" for="units">Unidades</label>
+              <input id="units" class="number-input" type="number" inputmode="numeric" min="1" value="100" />
+              <div class="btn-bar">
+                <button class="button mini" data-add="#units" data-val="50">+50</button>
+                <button class="button mini" data-add="#units" data-val="100">+100</button>
+                <button class="button mini" data-add="#units" data-val="-50">-50</button>
+              </div>
+            </div>
+
+            <div>
+              <label class="label" for="unitPrice">Precio por unidad (Q)</label>
+              <input id="unitPrice" class="number-input" type="number" inputmode="decimal" min="0" step="0.01" value="0.40" />
+              <div class="btn-bar">
+                <button id="btnMaga1" class="button mini">MAGA 1ª</button>
+                <button id="btnMaga2" class="button mini">MAGA 2ª</button>
+              </div>
+            </div>
+
+            <div>
+              <label class="label" for="payment">Forma de pago</label>
+              <select id="payment" class="select">
+                <option value="efectivo">Efectivo</option>
+                <option value="transferencia">Transferencia</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <label class="label">Total (Q)</label>
+            <div id="totalBox" class="pill">Q0.00</div>
+          </div>
+
+          <div class="row">
+            <label class="label" for="notes">Observaciones</label>
+            <textarea id="notes" class="input" rows="2" placeholder="Ej. Entrega sábado a las 6am"></textarea>
+          </div>
+
+          <div class="row row-actions">
+            <button id="saveSaleBtn" class="button primary">💾 Guardar venta</button>
+            <button id="syncBtn" class="button">🔄 Sincronizar</button>
+            <button id="clearBtn" class="button">🧹 Limpiar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lista de ventas de hoy -->
+    <section class="list-section">
+      <div class="card">
+        <div class="card-header">
+          <h2>📜 Ventas de hoy</h2>
+        </div>
+        <div class="card-body">
+          <div class="list list-header">
+            <div class="list-cell">Hora</div>
+            <div class="list-cell">Cliente</div>
+            <div class="list-cell">Calidad</div>
+            <div class="list-cell">Unid</div>
+            <div class="list-cell">P/U</div>
+            <div class="list-cell">Total</div>
+          </div>
+          <div id="salesList" class="list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Firebase compat (CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <!-- Config y offline -->
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/offline.js"></script>
+    <!-- Nav común -->
+  <script src="/js/nav.js"></script>
+
+  <!-- Lógica -->
+  <script src="/js/ventas.js"></script>
+
+
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (!reg) navigator.serviceWorker.register('/sw.js').catch(console.error);
+      });
+    }
+  </script>
+</body>
+</html>

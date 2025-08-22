@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Gastos · Finca La Herradura</title>
+  <link rel="stylesheet" href="./css/main.css" />
+  <link rel="manifest" href="/manifest.json" />
+</head>
+<body>
+  <!-- Indicador de conectividad -->
+  <div id="connectivityIndicator" class="connectivity-indicator offline" aria-live="polite">
+    <span class="connectivity-dot"></span>
+    <span id="connectivityText">Sin Internet</span>
+    <span id="pendingBadge" class="pending-badge hidden">0</span>
+  </div>
+
+  <main class="page expenses-page">
+    <header class="page-header">
+      <h1>💸 Gastos</h1>
+      <p class="subtitle">Categoría · descripción · monto · proveedor</p>
+    </header>
+
+    <!-- KPIs del día -->
+    <section class="stats-section">
+      <div class="stat-card">
+        <div class="stat-number" id="kpiExpCount">0</div>
+        <div class="stat-label">Gastos hoy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="kpiExpTotal">Q0</div>
+        <div class="stat-label">Total de hoy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="kpiExpAvg">Q0.00</div>
+        <div class="stat-label">Promedio</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="kpiTopCat">—</div>
+        <div class="stat-label">Categoría top</div>
+      </div>
+    </section>
+
+    <!-- Registro de gasto -->
+    <section class="form-section">
+      <div class="card">
+        <div class="card-header">
+          <h2>🧾 Registrar gasto</h2>
+        </div>
+        <div class="card-body">
+          <div class="row two-col">
+            <div>
+              <label class="label" for="category">Categoría</label>
+              <select id="category" class="select">
+                <option value="fertilizantes">Fertilizantes</option>
+                <option value="pesticidas">Pesticidas</option>
+                <option value="combustible">Combustible</option>
+                <option value="salarios">Salarios</option>
+                <option value="mantenimiento">Mantenimiento</option>
+                <option value="transporte">Transporte</option>
+                <option value="otros">Otros</option>
+              </select>
+            </div>
+            <div>
+              <label class="label" for="provider">Proveedor</label>
+              <input id="provider" class="input" type="text" placeholder="Ej. AgroSur" />
+            </div>
+          </div>
+
+          <div class="row">
+            <label class="label" for="description">Descripción</label>
+            <input id="description" class="input" type="text" placeholder="Ej. Urea 46% saco 50kg" />
+          </div>
+
+          <div class="row two-col">
+            <div>
+              <label class="label" for="amount">Monto (Q)</label>
+              <input id="amount" class="number-input" type="number" inputmode="decimal" step="0.01" min="0.01" value="100.00" />
+              <div class="btn-bar">
+                <button class="button mini" data-add="#amount" data-val="50">+50</button>
+                <button class="button mini" data-add="#amount" data-val="100">+100</button>
+                <button class="button mini" data-add="#amount" data-val="-10">-10</button>
+              </div>
+            </div>
+            <div>
+              <label class="label" for="dateInput">Fecha</label>
+              <input id="dateInput" class="input" type="date" />
+            </div>
+          </div>
+
+          <div class="row row-actions">
+            <button id="saveExpenseBtn" class="button primary">💾 Guardar gasto</button>
+            <button id="syncBtn" class="button">🔄 Sincronizar</button>
+            <button id="clearBtn" class="button">🧹 Limpiar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lista de hoy -->
+    <section class="list-section">
+      <div class="card">
+        <div class="card-header">
+          <h2>📜 Gastos de hoy</h2>
+        </div>
+        <div class="card-body">
+          <div class="list list-header">
+            <div class="list-cell">Hora</div>
+            <div class="list-cell">Categoría</div>
+            <div class="list-cell">Proveedor</div>
+            <div class="list-cell">Descripción</div>
+            <div class="list-cell right">Monto</div>
+          </div>
+          <div id="expList" class="list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Firebase compat (CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <!-- Config y offline -->
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/offline.js"></script>
+
+    <!-- Nav común -->
+  <script src="/js/nav.js"></script>
+
+  <!-- Lógica -->
+  <script src="/js/gastos.js"></script>
+
+
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (!reg) navigator.serviceWorker.register('/sw.js').catch(console.error);
+      });
+    }
+  </script>
+</body>
+</html>

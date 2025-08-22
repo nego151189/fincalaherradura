@@ -1,0 +1,35 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "recordatorios_asistente",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "completado", "order": "ASCENDING" },
+        { "fieldPath": "fecha_programada", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "recordatorios_asistente",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "completado", "order": "ASCENDING" },
+        { "fieldPath": "fecha_programada", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "tratamientos_fitosanitarios",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "fecha", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "cosechas_diarias",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "fecha", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

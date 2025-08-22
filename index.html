@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Finca La Herradura · Dashboard</title>
+  <link rel="stylesheet" href="./css/main.css" />
+  <link rel="manifest" href="/manifest.json" />
+</head>
+<body>
+  <!-- Indicador de conectividad -->
+  <div id="connectivityIndicator" class="connectivity-indicator offline" aria-live="polite">
+    <span class="connectivity-dot"></span>
+    <span id="connectivityText">Sin Internet</span>
+    <span id="pendingBadge" class="pending-badge hidden">0</span>
+  </div>
+
+  <main class="page dashboard-page">
+    <header class="page-header">
+      <h1>🌿 Finca La Herradura</h1>
+      <p class="subtitle">Resumen del día · Producción · Tanque · Precio MAGA · Ventas · Gastos</p>
+    </header>
+
+    <!-- KPIs -->
+    <section class="stats-section">
+      <div class="stat-card">
+        <div class="stat-number" id="kpiUnits">0</div>
+        <div class="stat-label">Unidades hoy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="kpiTrees">0</div>
+        <div class="stat-label">Árboles cosechados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="kpiTank">100%</div>
+        <div class="stat-label">Nivel del tanque</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="kpiMagaUnit">Q0.40</div>
+        <div class="stat-label">Precio MAGA / unidad</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="kpiSales">Q0</div>
+        <div class="stat-label">Ventas hoy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="kpiExpenses">Q0</div>
+        <div class="stat-label">Gastos hoy</div>
+      </div>
+    </section>
+
+    <!-- Valor estimado (opcional pero útil) -->
+    <section class="stats-section" style="margin-top:0;">
+      <div class="stat-card" style="grid-column: span 2;">
+        <div class="stat-number" id="kpiEstimate">Q0</div>
+        <div class="stat-label">Valor estimado de la cosecha de hoy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="kpiUpdated">—</div>
+        <div class="stat-label">Actualizado</div>
+      </div>
+    </section>
+
+    <!-- Accesos rápidos -->
+    <section class="form-section">
+      <div class="card">
+        <div class="card-header">
+          <h2>⚡ Acciones rápidas</h2>
+        </div>
+        <div class="card-body">
+          <div class="quick-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;">
+            <a class="button primary" href="/produccion.html">🌿 Registrar Cosecha</a>
+            <a class="button" href="/riegos.html">💧 Programar Riego</a>
+            <a class="button" href="/precios.html">💰 Ver Precios</a>
+            <a class="button" href="/ventas.html">🧾 Registrar Venta</a>
+            <a class="button" href="/gastos.html">📉 Registrar Gasto</a>
+            <a class="button" href="/tratamientos.html">🧪 Tratamientos</a>
+            <a class="button" href="/arboles.html">🌳 Gestión de Árboles</a>
+            <button id="syncNowBtn" class="button">🔄 Sincronizar pendientes</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recordatorios y alertas -->
+    <section class="list-section">
+      <div class="card">
+        <div class="card-header">
+          <h2>🔔 Recordatorios importantes</h2>
+        </div>
+        <div class="card-body">
+          <div id="remindersList" class="list">
+            <!-- se llena dinámicamente -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Listado rápido de eventos de hoy -->
+    <section class="list-section">
+      <div class="card">
+        <div class="card-header">
+          <h2>📜 Hoy en la finca</h2>
+        </div>
+        <div class="card-body">
+          <div class="list list-header">
+            <div class="list-cell">Hora</div>
+            <div class="list-cell">Tipo</div>
+            <div class="list-cell">Detalle</div>
+            <div class="list-cell">Valor</div>
+          </div>
+          <div id="todayFeed" class="list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Firebase compat (CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+
+  <!-- Config y offline -->
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/offline.js"></script>
+
+    <!-- Botonera inferior común -->
+  <script src="/js/nav.js"></script>
+
+  <!-- Lógica del dashboard -->
+  <script src="/js/index.js"></script>
+
+
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (!reg) navigator.serviceWorker.register('/sw.js').catch(console.error);
+      });
+    }
+  </script>
+</body>
+</html>

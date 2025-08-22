@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Producción · Finca La Herradura</title>
+  <link rel="stylesheet" href="./css/main.css" />
+  <link rel="manifest" href="/manifest.json" />
+</head>
+<body>
+  <!-- Indicador de conectividad -->
+  <div id="connectivityIndicator" class="connectivity-indicator offline" aria-live="polite">
+    <span class="connectivity-dot"></span>
+    <span id="connectivityText">Sin Internet</span>
+    <span id="pendingBadge" class="pending-badge hidden">0</span>
+  </div>
+
+  <main class="page production-page">
+    <header class="page-header">
+      <h1>🌿 Registrar cosecha</h1>
+      <p class="subtitle">Unidades por árbol · Primera/Segunda/Descarte · Trabajador</p>
+    </header>
+
+    <!-- KPIs del día -->
+    <section class="stats-section">
+      <div class="stat-card">
+        <div class="stat-number" id="kpiProdUnits">0</div>
+        <div class="stat-label">Unidades hoy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="kpiProdTrees">0</div>
+        <div class="stat-label">Árboles cosechados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="kpiProdValue">Q0</div>
+        <div class="stat-label">Valor estimado</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="kpiUnitPrice">Q0.00</div>
+        <div class="stat-label">Precio por unidad</div>
+      </div>
+    </section>
+
+    <!-- Selector de árbol -->
+    <section class="form-section">
+      <div class="card">
+        <div class="card-header">
+          <h2>🌳 Árbol</h2>
+        </div>
+        <div class="card-body">
+          <div class="row two-col">
+            <div>
+              <label class="label" for="treeSearch">Buscar ARB001…ARB800</label>
+              <input id="treeSearch" class="input" type="search" placeholder="Ej. ARB123" />
+            </div>
+            <div>
+              <label class="label">Seleccionado</label>
+              <div id="selectedTree" class="pill">—</div>
+            </div>
+          </div>
+          <div id="treeGrid" class="tree-grid compact" role="list" aria-label="Selector de árboles"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Formulario de unidades -->
+    <section class="form-section">
+      <div class="card">
+        <div class="card-header">
+          <h2>🧮 Unidades</h2>
+        </div>
+        <div class="card-body">
+          <div class="row three-col">
+            <div>
+              <label class="label" for="uPrimera">Primera</label>
+              <input id="uPrimera" class="number-input" type="number" inputmode="numeric" min="0" value="0" />
+              <div class="btn-bar">
+                <button class="button mini" data-add="#uPrimera" data-val="10">+10</button>
+                <button class="button mini" data-add="#uPrimera" data-val="50">+50</button>
+                <button class="button mini" data-add="#uPrimera" data-val="-10">-10</button>
+              </div>
+            </div>
+            <div>
+              <label class="label" for="uSegunda">Segunda</label>
+              <input id="uSegunda" class="number-input" type="number" inputmode="numeric" min="0" value="0" />
+              <div class="btn-bar">
+                <button class="button mini" data-add="#uSegunda" data-val="10">+10</button>
+                <button class="button mini" data-add="#uSegunda" data-val="50">+50</button>
+                <button class="button mini" data-add="#uSegunda" data-val="-10">-10</button>
+              </div>
+            </div>
+            <div>
+              <label class="label" for="uDescarte">Descarte</label>
+              <input id="uDescarte" class="number-input" type="number" inputmode="numeric" min="0" value="0" />
+              <div class="btn-bar">
+                <button class="button mini" data-add="#uDescarte" data-val="10">+10</button>
+                <button class="button mini" data-add="#uDescarte" data-val="50">+50</button>
+                <button class="button mini" data-add="#uDescarte" data-val="-10">-10</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="row two-col">
+            <div>
+              <label class="label" for="workerSelect">Trabajador</label>
+              <select id="workerSelect" class="select">
+                <option value="trabajador1">Trabajador 1</option>
+                <option value="trabajador2">Trabajador 2</option>
+              </select>
+            </div>
+            <div>
+              <label class="label" for="harvestTime">Hora</label>
+              <input id="harvestTime" class="input" type="time" />
+            </div>
+          </div>
+
+          <div class="row">
+            <label class="label" for="notes">Observaciones</label>
+            <textarea id="notes" class="input" rows="2" placeholder="Ej. frutos de buen tamaño"></textarea>
+          </div>
+
+          <div class="row row-actions">
+            <button id="saveBtn" class="button primary">💾 Guardar cosecha</button>
+            <button id="syncBtn" class="button">🔄 Sincronizar</button>
+            <button id="clearBtn" class="button">🧹 Limpiar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lista de hoy -->
+    <section class="list-section">
+      <div class="card">
+        <div class="card-header">
+          <h2>📜 Cosechas de hoy</h2>
+        </div>
+        <div class="card-body">
+          <div class="list list-header">
+            <div class="list-cell">Hora</div>
+            <div class="list-cell">Árbol</div>
+            <div class="list-cell">1ª/2ª/Desc</div>
+            <div class="list-cell">Total</div>
+          </div>
+          <div id="todayList" class="list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Firebase compat (CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <!-- Config y offline -->
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/offline.js"></script>
+
+    <!-- Nav común -->
+  <script src="/js/nav.js"></script>
+
+  <!-- Lógica -->
+  <script src="/js/produccion.js"></script>
+
+
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (!reg) navigator.serviceWorker.register('/sw.js').catch(console.error);
+      });
+    }
+  </script>
+</body>
+</html>

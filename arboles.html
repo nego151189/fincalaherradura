@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Árboles · Finca La Herradura</title>
+  <link rel="stylesheet" href="./css/main.css" />
+  <link rel="manifest" href="/manifest.json" />
+</head>
+<body>
+  <!-- Indicador de conectividad -->
+  <div id="connectivityIndicator" class="connectivity-indicator offline" aria-live="polite">
+    <span class="connectivity-dot"></span>
+    <span id="connectivityText">Sin Internet</span>
+    <span id="pendingBadge" class="pending-badge hidden">0</span>
+  </div>
+
+  <main class="page trees-page">
+    <header class="page-header">
+      <h1>🌳 Gestión de Árboles</h1>
+      <p class="subtitle">700–800 árboles · estados: sano, HLB, pulgón, fumagina</p>
+    </header>
+
+    <!-- Resumen de estados -->
+    <section class="stats-section">
+      <div class="stat-card">
+        <div class="stat-number" id="countAll">0</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="countSano">0</div>
+        <div class="stat-label">Sanos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="countHLB">0</div>
+        <div class="stat-label">HLB</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="countPulgon">0</div>
+        <div class="stat-label">Pulgón</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="countFumagina">0</div>
+        <div class="stat-label">Fumagina</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="lastInspection">—</div>
+        <div class="stat-label">Última inspección</div>
+      </div>
+    </section>
+
+    <!-- Filtros -->
+    <section class="form-section">
+      <div class="card">
+        <div class="card-header">
+          <h2>🔎 Buscar y filtrar</h2>
+        </div>
+        <div class="card-body">
+          <div class="row two-col">
+            <div>
+              <label class="label" for="treeSearch">Buscar ID (ARB001…ARB800)</label>
+              <input id="treeSearch" class="input" type="search" placeholder="Ej. ARB123" />
+            </div>
+            <div>
+              <label class="label" for="stateFilter">Estado</label>
+              <select id="stateFilter" class="select">
+                <option value="">Todos</option>
+                <option value="sano">Sano</option>
+                <option value="hlb">HLB</option>
+                <option value="pulgon">Pulgón</option>
+                <option value="fumagina">Fumagina</option>
+              </select>
+            </div>
+          </div>
+          <small class="muted">Toca un árbol para ver/actualizar su estado y adjuntar foto.</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- Grid de árboles -->
+    <section class="list-section">
+      <div class="card">
+        <div class="card-header">
+          <h2>🗺️ Mapa simple (grid)</h2>
+        </div>
+        <div class="card-body">
+          <div id="treeGrid" class="tree-grid compact" role="list" aria-label="Lista de árboles">
+            <!-- Se llena con ARB001..ARB800 -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel de edición -->
+    <section class="form-section">
+      <div class="card">
+        <div class="card-header">
+          <h2 id="panelTitle">Detalles del árbol</h2>
+        </div>
+        <div class="card-body">
+          <div class="row two-col">
+            <div>
+              <label class="label">ID</label>
+              <div id="panelId" class="pill">—</div>
+            </div>
+            <div>
+              <label class="label">Estado actual</label>
+              <div id="panelState" class="pill">—</div>
+            </div>
+          </div>
+
+          <div class="row two-col">
+            <div>
+              <label class="label">Productividad promedio</label>
+              <div id="panelProd" class="pill">0 uds/mes</div>
+            </div>
+            <div>
+              <label class="label">Última inspección</label>
+              <div id="panelInspect" class="pill">—</div>
+            </div>
+          </div>
+
+          <div class="row">
+            <label class="label">Cambiar estado</label>
+            <div class="state-buttons">
+              <button data-state="sano" class="button state-btn">✅ Sano</button>
+              <button data-state="hlb" class="button state-btn">🟡 HLB</button>
+              <button data-state="pulgon" class="button state-btn">🟠 Pulgón</button>
+              <button data-state="fumagina" class="button state-btn">🔴 Fumagina</button>
+            </div>
+          </div>
+
+          <div class="row">
+            <label class="label" for="treeNote">Observaciones</label>
+            <textarea id="treeNote" class="input" rows="2" placeholder="Ej. hojas amarillas sector B"></textarea>
+          </div>
+
+          <div class="row">
+            <label class="label">Foto (plaga/daño)</label>
+            <input id="treePhoto" class="input" type="file" accept="image/*" />
+            <small class="muted">Para subir la foto se necesita conexión.</small>
+          </div>
+
+          <div class="row row-actions">
+            <button id="saveTreeBtn" class="button primary">💾 Guardar</button>
+            <button id="uploadPhotoBtn" class="button">📸 Subir foto</button>
+          </div>
+
+          <div class="row">
+            <div id="lastPhotoWrap" class="muted">Última foto: <span id="lastPhoto">—</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Firebase compat (CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+
+  <!-- Config y offline -->
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/offline.js"></script>
+
+    <!-- Nav común -->
+  <script src="/js/nav.js"></script>
+
+  <!-- Lógica -->
+  <script src="/js/arboles.js"></script>
+
+
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (!reg) navigator.serviceWorker.register('/sw.js').catch(console.error);
+      });
+    }
+  </script>
+</body>
+</html>

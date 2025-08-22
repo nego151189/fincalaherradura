@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Riego · Finca La Herradura</title>
+  <link rel="stylesheet" href="./css/main.css" />
+  <link rel="manifest" href="/manifest.json" />
+</head>
+<body>
+  <!-- Indicador de conectividad -->
+  <div id="connectivityIndicator" class="connectivity-indicator offline" aria-live="polite">
+    <span class="connectivity-dot"></span>
+    <span id="connectivityText">Sin Internet</span>
+    <span id="pendingBadge" class="pending-badge hidden">0</span>
+  </div>
+
+  <main class="page irrigation-page">
+    <header class="page-header">
+      <h1>💧 Control de riego</h1>
+      <p class="subtitle">Tanque 25,000L · riego por árboles · programación sencilla</p>
+    </header>
+
+    <!-- KPIs -->
+    <section class="stats-section">
+      <div class="stat-card">
+        <div class="stat-number" id="tankLevel">100%</div>
+        <div class="stat-label">Nivel del tanque</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="irrigationsToday">0</div>
+        <div class="stat-label">Riegos hoy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="litersToday">0 L</div>
+        <div class="stat-label">Litros usados hoy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="lastRefill">—</div>
+        <div class="stat-label">Último llenado</div>
+      </div>
+    </section>
+
+    <!-- Registro de riego -->
+    <section class="form-section">
+      <div class="card">
+        <div class="card-header">
+          <h2>📋 Registrar riego</h2>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <label class="label" for="treeSearch">Árboles regados</label>
+            <input id="treeSearch" class="input" type="search" placeholder="Buscar ARB001…ARB800" />
+          </div>
+
+          <div id="treeGrid" class="tree-grid compact" role="list" aria-label="Selector de árboles">
+            <!-- ARB001..ARB800 -->
+          </div>
+          <div class="row tiny">
+            <small>Seleccionados: <strong id="selectedCount">0</strong></small>
+          </div>
+
+          <div class="row">
+            <label class="label" for="litersInput">Litros utilizados</label>
+            <input id="litersInput" class="number-input" type="number" inputmode="decimal" step="1" min="1" placeholder="Ej. 200" />
+            <small class="muted">Se descuenta del tanque (25,000L).</small>
+          </div>
+
+          <div class="row two-col">
+            <div>
+              <label class="label" for="startTime">Inicio (opcional)</label>
+              <input id="startTime" class="input" type="time" />
+            </div>
+            <div>
+              <label class="label" for="endTime">Fin (opcional)</label>
+              <input id="endTime" class="input" type="time" />
+            </div>
+          </div>
+
+          <div class="row">
+            <label class="label" for="workerSelect">Trabajador</label>
+            <select id="workerSelect" class="select">
+              <option value="trabajador1">Trabajador 1</option>
+              <option value="trabajador2">Trabajador 2</option>
+            </select>
+          </div>
+
+          <div class="row">
+            <label class="label" for="notes">Observaciones</label>
+            <textarea id="notes" class="input" rows="2" placeholder="Ej. Sector A, suelo seco."></textarea>
+          </div>
+
+          <div class="row row-actions">
+            <button id="saveIrrigationBtn" class="button primary">💾 Guardar riego</button>
+            <button id="syncBtn" class="button">🔄 Sincronizar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Llenado del tanque -->
+    <section class="form-section">
+      <div class="card">
+        <div class="card-header">
+          <h2>🛢️ Llenar tanque</h2>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <label class="label" for="refillPercent">Nivel objetivo</label>
+            <input id="refillPercent" class="number-input" type="number" inputmode="numeric" min="1" max="100" value="100" />
+            <small class="muted">Ajusta a 100% después de rellenar el tanque.</small>
+          </div>
+          <div class="row row-actions">
+            <button id="saveRefillBtn" class="button">⛽ Registrar llenado</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Programación simple -->
+    <section class="form-section">
+      <div class="card">
+        <div class="card-header">
+          <h2>⏰ Programar riego</h2>
+        </div>
+        <div class="card-body">
+          <div class="row two-col">
+            <div>
+              <label class="label" for="scheduleDate">Fecha</label>
+              <input id="scheduleDate" class="input" type="date" />
+            </div>
+            <div>
+              <label class="label" for="scheduleTime">Hora</label>
+              <input id="scheduleTime" class="input" type="time" />
+            </div>
+          </div>
+          <div class="row">
+            <label class="label" for="scheduleNote">Nota</label>
+            <input id="scheduleNote" class="input" type="text" placeholder="Ej. Regar Sector B (150 árboles)" />
+          </div>
+          <div class="row row-actions">
+            <button id="saveScheduleBtn" class="button">🗓️ Guardar recordatorio</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Historial de hoy -->
+    <section class="list-section">
+      <div class="card">
+        <div class="card-header">
+          <h2>📜 Riegos de hoy</h2>
+        </div>
+        <div class="card-body">
+          <div class="list list-header">
+            <div class="list-cell">Hora</div>
+            <div class="list-cell">Árboles</div>
+            <div class="list-cell">Litros</div>
+            <div class="list-cell">Tanque</div>
+          </div>
+          <div id="irrigationsList" class="list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Firebase compat (CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+
+  <!-- Config y offline -->
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/auth.js"></script> 
+  <script src="/js/offline.js"></script>
+
+   <!-- Nav común -->
+  <script src="/js/nav.js"></script>
+
+  <!-- Lógica -->
+  <script src="/js/riegos.js"></script>
+
+ 
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (!reg) navigator.serviceWorker.register('/sw.js').catch(console.error);
+      });
+    }
+  </script>
+</body>
+</html>

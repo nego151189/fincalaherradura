@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Tratamientos · Finca La Herradura</title>
+  <link rel="stylesheet" href="./css/main.css" />
+  <link rel="manifest" href="/manifest.json" />
+</head>
+<body>
+  <!-- Indicador de conectividad -->
+  <div id="connectivityIndicator" class="connectivity-indicator offline" aria-live="polite">
+    <span class="connectivity-dot"></span>
+    <span id="connectivityText">Sin Internet</span>
+    <span id="pendingBadge" class="pending-badge hidden">0</span>
+  </div>
+
+  <main class="page treatments-page">
+    <header class="page-header">
+      <h1>🧪 Tratamientos fitosanitarios</h1>
+      <p class="subtitle">HLB · Pulgón · Fumagina · producto · dosis · costo</p>
+    </header>
+
+    <!-- KPIs del día -->
+    <section class="stats-section">
+      <div class="stat-card">
+        <div class="stat-number" id="kpiTreatments">0</div>
+        <div class="stat-label">Tratamientos hoy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="kpiTreesTreated">0</div>
+        <div class="stat-label">Árboles tratados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="kpiCostTotal">Q0</div>
+        <div class="stat-label">Costo total</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="kpiTopProblem">—</div>
+        <div class="stat-label">Problema top</div>
+      </div>
+    </section>
+
+    <!-- Selección de árboles -->
+    <section class="form-section">
+      <div class="card">
+        <div class="card-header">
+          <h2>🌳 Selecciona árboles (multi-selección)</h2>
+        </div>
+        <div class="card-body">
+          <div class="row two-col">
+            <div>
+              <label class="label" for="treeSearch">Buscar ARB001…ARB800</label>
+              <input id="treeSearch" class="input" type="search" placeholder="Ej. ARB120 o 120" />
+            </div>
+            <div>
+              <label class="label">Seleccionados</label>
+              <div id="selectedCount" class="pill">0</div>
+            </div>
+          </div>
+
+          <div class="row two-col">
+            <div>
+              <label class="label" for="quickSelect">Selección rápida</label>
+              <input id="quickSelect" class="input" type="text" placeholder="Ej. ARB001, ARB010-ARB020, 35-40" />
+            </div>
+            <div class="row gap">
+              <button id="applyQuickBtn" class="button">✔️ Aplicar</button>
+              <button id="selectAllBtn" class="button">👆 Seleccionar todos</button>
+              <button id="clearSelBtn" class="button">🧹 Limpiar</button>
+            </div>
+          </div>
+
+          <div id="treeGrid" class="tree-grid compact" role="list" aria-label="Árboles"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Detalle del tratamiento -->
+    <section class="form-section">
+      <div class="card">
+        <div class="card-header">
+          <h2>🧴 Detalle</h2>
+        </div>
+        <div class="card-body">
+          <div class="row two-col">
+            <div>
+              <label class="label" for="problem">Problema</label>
+              <select id="problem" class="select">
+                <option value="hlb">HLB (árbol amarillo)</option>
+                <option value="pulgon">Pulgón</option>
+                <option value="fumagina">Fumagina</option>
+              </select>
+            </div>
+            <div>
+              <label class="label" for="effect">Efectividad (estimada)</label>
+              <select id="effect" class="select">
+                <option value="pendiente">Pendiente</option>
+                <option value="baja">Baja</option>
+                <option value="media">Media</option>
+                <option value="alta">Alta</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row two-col">
+            <div>
+              <label class="label" for="product">Producto utilizado</label>
+              <input id="product" class="input" type="text" placeholder="Ej. Imidacloprid 200 SL" />
+            </div>
+            <div>
+              <label class="label" for="dose">Dosis</label>
+              <input id="dose" class="input" type="text" placeholder="Ej. 10 ml/L" />
+            </div>
+          </div>
+
+          <div class="row two-col">
+            <div>
+              <label class="label" for="cost">Costo (Q)</label>
+              <input id="cost" class="number-input" type="number" inputmode="decimal" step="0.01" min="0" value="0.00" />
+              <div class="btn-bar">
+                <button class="button mini" data-add="#cost" data-val="25">+25</button>
+                <button class="button mini" data-add="#cost" data-val="50">+50</button>
+                <button class="button mini" data-add="#cost" data-val="-10">-10</button>
+              </div>
+            </div>
+            <div>
+              <label class="label" for="timeInput">Fecha y hora</label>
+              <div class="row two-col slim">
+                <input id="dateInput" class="input" type="date" />
+                <input id="timeInput" class="input" type="time" />
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <label class="label" for="notes">Observaciones</label>
+            <textarea id="notes" class="input" rows="2" placeholder="Ej. Aplicación temprano, sin viento"></textarea>
+          </div>
+
+          <div class="row row-actions">
+            <button id="saveTreatmentBtn" class="button primary">💾 Guardar tratamiento</button>
+            <button id="syncBtn" class="button">🔄 Sincronizar</button>
+            <button id="clearFormBtn" class="button">🧹 Limpiar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lista de hoy -->
+    <section class="list-section">
+      <div class="card">
+        <div class="card-header">
+          <h2>📜 Tratamientos de hoy</h2>
+        </div>
+        <div class="card-body">
+          <div class="list list-header">
+            <div class="list-cell">Hora</div>
+            <div class="list-cell">Problema</div>
+            <div class="list-cell">Producto</div>
+            <div class="list-cell">Árboles</div>
+            <div class="list-cell right">Costo</div>
+            <div class="list-cell">Efect.</div>
+          </div>
+          <div id="treatList" class="list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Firebase compat (CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <!-- Config y offline -->
+  <script src="/js/firebase-config.js"></script>
+    <script src="/js/auth.js"></script>
+  <script src="/js/offline.js"></script>
+
+    <!-- Nav común -->
+  <script src="/js/nav.js"></script>
+
+  <!-- Lógica -->
+  <script src="/js/tratamientos.js"></script>
+
+
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (!reg) navigator.serviceWorker.register('/sw.js').catch(console.error);
+      });
+    }
+  </script>
+</body>
+</html>
