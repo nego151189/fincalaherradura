@@ -165,12 +165,11 @@
 
 
 
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistration().then(reg => {
-        if (!reg) navigator.serviceWorker.register('/sw.js').catch(console.error);
-      });
-    }
-  </script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js', { scope: './' }); // ← relativo y con scope
+}
+</script>
 </body>
 </html>
+
