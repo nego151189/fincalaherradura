@@ -1,68 +1,9 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Permisos de desarrollo - MÁS PERMISIVOS
-    function isAuthed() {
-      return request.auth != null;
-    }
-    
-    function isDevelopment() {
-      return true; // PERMITE TODO EN DESARROLLO
-    }
-
-    // ========= PERMISOS TEMPORALES DE DESARROLLO =========
-    match /settings/app {
-      allow read, write: if isDevelopment();
-    }
-
-    match /users/{uid} {
-      allow read, write: if isDevelopment();
-    }
-
-    match /finca_la_herradura/{docId} {
-      allow read, write: if isDevelopment();
-    }
-
-    match /arboles/{arbolId} {
-      allow read, write: if isDevelopment();
-    }
-
-    match /cosechas_diarias/{docId} {
-      allow read, write: if isDevelopment();
-    }
-
-    match /riegos/{docId} {
-      allow read, write: if isDevelopment();
-    }
-
-    match /actividades_diarias/{docId} {
-      allow read, write: if isDevelopment();
-    }
-
-    match /tratamientos_fitosanitarios/{docId} {
-      allow read, write: if isDevelopment();
-    }
-
-    match /recordatorios_asistente/{docId} {
-      allow read, write: if isDevelopment();
-    }
-
-    match /ventas_directas/{docId} {
-      allow read, write: if isDevelopment();
-    }
-
-    match /gastos/{docId} {
-      allow read, write: if isDevelopment();
-    }
-
-    match /precios_maga/{docId} {
-      allow read, write: if isDevelopment();
-    }
-
-    // ========= FALLBACK =========
+    // PERMISOS TOTALES PARA DESARROLLO
     match /{document=**} {
-      allow read, write: if isDevelopment();
+      allow read, write: if true;
     }
   }
 }
