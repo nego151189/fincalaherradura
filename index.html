@@ -167,7 +167,13 @@
             });
             
             // Configurar botón de sincronización
-            document.getElementById('sync-now').addEventListener('click', syncPendingData);
+            document.getElementById('sync-now').addEventListener('click', function() {
+                if (typeof syncPendingData === 'function') {
+                    syncPendingData();
+                } else if (window.offline && window.offline.sync) {
+                    window.offline.sync();
+                }
+            });
             
             // Actualizar contador de pendientes cada 5 segundos
             setInterval(updatePendingCounter, 5000);
@@ -262,4 +268,3 @@
     </script>
 </body>
 </html>
-
