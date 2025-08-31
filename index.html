@@ -1,145 +1,265 @@
+=== filename: /index.html ===
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Finca La Herradura · Dashboard</title>
-  <link rel="stylesheet" href="css/main.css" />
-  <link rel="manifest" href="manifest.json" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Finca La Herradura - Dashboard</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#7CB342">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Finca La Herradura">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- Indicador de conectividad -->
-  <div id="connectivityIndicator" class="connectivity-indicator offline" aria-live="polite">
-    <span class="connectivity-dot"></span>
-    <span id="connectivityText">Sin Internet</span>
-    <span id="pendingBadge" class="pending-badge hidden">0</span>
-  </div>
+    <div id="app">
+        <!-- Header con estado de conexión -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🍋 Finca La Herradura</h1>
+                <div id="connection-status" class="connection-status offline">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Verificando...</span>
+                </div>
+            </div>
+        </header>
 
-  <main class="page dashboard-page">
-    <header class="page-header">
-      <h1>🌿 Finca La Herradura</h1>
-      <p class="subtitle">Resumen del día · Producción · Tanque · Precio MAGA · Ventas · Gastos</p>
-    </header>
-
-    <!-- KPIs -->
-    <section class="stats-section">
-      <div class="stat-card">
-        <div class="stat-number" id="kpiUnits">0</div>
-        <div class="stat-label">Unidades hoy</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="kpiTrees">0</div>
-        <div class="stat-label">Árboles cosechados</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="kpiTank">100%</div>
-        <div class="stat-label">Nivel del tanque</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="kpiMagaUnit">Q0.40</div>
-        <div class="stat-label">Precio MAGA / unidad</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="kpiSales">Q0</div>
-        <div class="stat-label">Ventas hoy</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="kpiExpenses">Q0</div>
-        <div class="stat-label">Gastos hoy</div>
-      </div>
-    </section>
-
-    <!-- Valor estimado (opcional pero útil) -->
-    <section class="stats-section" style="margin-top:0;">
-      <div class="stat-card" style="grid-column: span 2;">
-        <div class="stat-number" id="kpiEstimate">Q0</div>
-        <div class="stat-label">Valor estimado de la cosecha de hoy</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="kpiUpdated">—</div>
-        <div class="stat-label">Actualizado</div>
-      </div>
-    </section>
-
-    <!-- Accesos rápidos -->
-    <section class="form-section">
-      <div class="card">
-        <div class="card-header">
-          <h2>⚡ Acciones rápidas</h2>
+        <!-- Botón de sincronización (solo visible si hay pendientes) -->
+        <div id="sync-button-container" class="sync-container hidden">
+            <button id="sync-now" class="btn-sync">
+                <span class="sync-icon">🔄</span>
+                Sincronizar Pendientes (<span id="pending-count">0</span>)
+            </button>
         </div>
-        <div class="card-body">
-          <div class="quick-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;">
-            <a class="button primary" href="/produccion.html">🌿 Registrar Cosecha</a>
-            <a class="button" href="/riegos.html">💧 Programar Riego</a>
-            <a class="button" href="/precios.html">💰 Ver Precios</a>
-            <a class="button" href="/ventas.html">🧾 Registrar Venta</a>
-            <a class="button" href="/gastos.html">📉 Registrar Gasto</a>
-            <a class="button" href="/tratamientos.html">🧪 Tratamientos</a>
-            <a class="button" href="/arboles.html">🌳 Gestión de Árboles</a>
-            <button id="syncNowBtn" class="button">🔄 Sincronizar pendientes</button>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <!-- Recordatorios y alertas -->
-    <section class="list-section">
-      <div class="card">
-        <div class="card-header">
-          <h2>🔔 Recordatorios importantes</h2>
-        </div>
-        <div class="card-body">
-          <div id="remindersList" class="list">
-            <!-- se llena dinámicamente -->
-          </div>
-        </div>
-      </div>
-    </section>
+        <!-- Dashboard Stats -->
+        <section class="dashboard-stats">
+            <div class="stat-card primary">
+                <div class="stat-icon">📊</div>
+                <div class="stat-content">
+                    <h3 id="produccion-hoy">Cargando...</h3>
+                    <p>Producción Hoy</p>
+                </div>
+            </div>
+            
+            <div class="stat-card secondary">
+                <div class="stat-icon">💧</div>
+                <div class="stat-content">
+                    <h3 id="tanque-nivel">Cargando...</h3>
+                    <p>Tanque de Riego</p>
+                </div>
+            </div>
+            
+            <div class="stat-card tertiary">
+                <div class="stat-icon">🌳</div>
+                <div class="stat-content">
+                    <h3 id="arboles-sanos">Cargando...</h3>
+                    <p>Árboles Sanos</p>
+                </div>
+            </div>
+        </section>
 
-    <!-- Listado rápido de eventos de hoy -->
-    <section class="list-section">
-      <div class="card">
-        <div class="card-header">
-          <h2>📜 Hoy en la finca</h2>
-        </div>
-        <div class="card-body">
-          <div class="list list-header">
-            <div class="list-cell">Hora</div>
-            <div class="list-cell">Tipo</div>
-            <div class="list-cell">Detalle</div>
-            <div class="list-cell">Valor</div>
-          </div>
-          <div id="todayFeed" class="list"></div>
-        </div>
-      </div>
-    </section>
-  </main>
+        <!-- Acciones Rápidas -->
+        <section class="quick-actions">
+            <h2>Acciones Rápidas</h2>
+            <div class="action-buttons">
+                <button onclick="location.href='produccion.html'" class="action-btn primary">
+                    <div class="btn-icon">🍋</div>
+                    <div class="btn-content">
+                        <h3>Registrar Cosecha</h3>
+                        <p>Producción diaria</p>
+                    </div>
+                </button>
+                
+                <button onclick="location.href='riegos.html'" class="action-btn secondary">
+                    <div class="btn-icon">💧</div>
+                    <div class="btn-content">
+                        <h3>Control de Riego</h3>
+                        <p>Gestión del agua</p>
+                    </div>
+                </button>
+                
+                <button onclick="location.href='arboles.html'" class="action-btn tertiary">
+                    <div class="btn-icon">🌳</div>
+                    <div class="btn-content">
+                        <h3>Gestión Árboles</h3>
+                        <p>Estado y ubicación</p>
+                    </div>
+                </button>
+            </div>
+        </section>
 
-  <!-- Firebase compat (CDN) -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+        <!-- Resumen del Día -->
+        <section class="daily-summary">
+            <h2>Resumen del Día</h2>
+            <div class="summary-content">
+                <div class="summary-item">
+                    <span class="summary-label">Última cosecha:</span>
+                    <span id="ultima-cosecha">--:--</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Último riego:</span>
+                    <span id="ultimo-riego">--:--</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Trabajador activo:</span>
+                    <span id="trabajador-activo">Ninguno</span>
+                </div>
+            </div>
+        </section>
 
-  <!-- Config y offline -->
-  <script src="js/firebase-config.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/offline.js"></script>
+        <!-- Navegación inferior -->
+        <nav class="bottom-nav">
+            <a href="index.html" class="nav-item active">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Inicio</span>
+            </a>
+            <a href="produccion.html" class="nav-item">
+                <span class="nav-icon">🍋</span>
+                <span class="nav-label">Cosecha</span>
+            </a>
+            <a href="riegos.html" class="nav-item">
+                <span class="nav-icon">💧</span>
+                <span class="nav-label">Riego</span>
+            </a>
+            <a href="arboles.html" class="nav-item">
+                <span class="nav-icon">🌳</span>
+                <span class="nav-label">Árboles</span>
+            </a>
+        </nav>
+    </div>
 
-    <!-- Botonera inferior común -->
-  <script src="js/nav.js"></script>
+    <!-- Loading overlay -->
+    <div id="loading" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>Cargando datos...</p>
+    </div>
 
-  <!-- Lógica del dashboard -->
-  <script src="js/index.js"></script>
-
-
-
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js', { scope: './' }); // ← relativo y con scope
-}
-</script>
+    <!-- Scripts Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+    
+    <!-- Scripts de la app -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/offline.js"></script>
+    <script src="js/auth.js"></script>
+    
+    <script>
+        // Inicializar dashboard al cargar
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Verificar autenticación
+            firebase.auth().onAuthStateChanged(async (user) => {
+                if (!user) {
+                    // Auto-login anónimo para simplicidad
+                    await firebase.auth().signInAnonymously();
+                }
+                
+                // Cargar datos del dashboard
+                await loadDashboardData();
+                
+                // Ocultar loading
+                document.getElementById('loading').style.display = 'none';
+            });
+            
+            // Configurar botón de sincronización
+            document.getElementById('sync-now').addEventListener('click', syncPendingData);
+            
+            // Actualizar contador de pendientes cada 5 segundos
+            setInterval(updatePendingCounter, 5000);
+        });
+        
+        async function loadDashboardData() {
+            try {
+                const db = firebase.firestore();
+                const today = new Date().toISOString().split('T')[0];
+                
+                // Cargar producción del día
+                const cosechasRef = db.collection('cosechas_diarias');
+                const cosechasHoy = await cosechasRef.where('fecha', '==', today).get();
+                let totalProduccion = 0;
+                let ultimaCosecha = '--:--';
+                
+                if (!cosechasHoy.empty) {
+                    cosechasHoy.forEach(doc => {
+                        const data = doc.data();
+                        totalProduccion += (data.primera || 0) + (data.segunda || 0) + (data.descarte || 0);
+                        if (data.timestamp) {
+                            const hora = new Date(data.timestamp.toDate()).toLocaleTimeString('es-GT', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                            if (ultimaCosecha === '--:--' || data.timestamp.toDate() > new Date(ultimaCosecha)) {
+                                ultimaCosecha = hora;
+                            }
+                        }
+                    });
+                }
+                
+                document.getElementById('produccion-hoy').textContent = totalProduccion + ' limones';
+                document.getElementById('ultima-cosecha').textContent = ultimaCosecha;
+                
+                // Cargar nivel del tanque (último registro)
+                const riegosRef = db.collection('riegos');
+                const ultimoRiego = await riegosRef.orderBy('timestamp', 'desc').limit(1).get();
+                
+                let nivelTanque = '25,000L';
+                let ultimoRiegoHora = '--:--';
+                
+                if (!ultimoRiego.empty) {
+                    const data = ultimoRiego.docs[0].data();
+                    nivelTanque = (data.nivel_tanque || 25000).toLocaleString() + 'L';
+                    if (data.timestamp) {
+                        ultimoRiegoHora = new Date(data.timestamp.toDate()).toLocaleTimeString('es-GT', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    }
+                }
+                
+                document.getElementById('tanque-nivel').textContent = nivelTanque;
+                document.getElementById('ultimo-riego').textContent = ultimoRiegoHora;
+                
+                // Contar árboles sanos
+                const arbolesRef = db.collection('arboles');
+                const arbolesSanos = await arbolesRef.where('estado_salud', '==', 'sano').get();
+                document.getElementById('arboles-sanos').textContent = arbolesSanos.size + ' de 800';
+                
+            } catch (error) {
+                console.error('Error cargando dashboard:', error);
+                // Mostrar datos offline si están disponibles
+                loadOfflineDashboardData();
+            }
+        }
+        
+        function loadOfflineDashboardData() {
+            // Cargar datos básicos desde localStorage si no hay conexión
+            const offlineData = localStorage.getItem('dashboard_offline');
+            if (offlineData) {
+                const data = JSON.parse(offlineData);
+                document.getElementById('produccion-hoy').textContent = data.produccion || '0 limones';
+                document.getElementById('tanque-nivel').textContent = data.tanque || '25,000L';
+                document.getElementById('arboles-sanos').textContent = data.arboles || '800 de 800';
+            }
+        }
+        
+        // Registrar Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('SW registrado:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('SW falló:', error);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>
 
