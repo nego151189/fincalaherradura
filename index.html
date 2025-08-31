@@ -24,6 +24,13 @@
                     <span class="status-text">Verificando...</span>
                 </div>
             </div>
+            <!-- En el header, después del connection-status -->
+            <div id="sync-button-container" class="sync-container hidden">
+                <button id="sync-now" class="btn-sync">
+                    <span class="sync-icon">🔄</span>
+                    Sincronizar Pendientes (<span id="pending-count">0</span>)
+                </button>
+            </div>
         </header>
 
         <!-- Botón de sincronización (solo visible si hay pendientes) -->
@@ -149,122 +156,139 @@
     <script src="js/offline.js"></script>
     <script src="js/auth.js"></script>
     
-    <script>
-        // Inicializar dashboard al cargar
-        document.addEventListener('DOMContentLoaded', async function() {
-            // Verificar autenticación
-            firebase.auth().onAuthStateChanged(async (user) => {
-                if (!user) {
-                    // Auto-login anónimo para simplicidad
-                    await firebase.auth().signInAnonymously();
-                }
-                
-                // Cargar datos del dashboard
-                await loadDashboardData();
-                
-                // Ocultar loading
-                document.getElementById('loading').style.display = 'none';
-            });
+<script>
+    // Inicializar dashboard al cargar
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Verificar autenticación
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (!user) {
+                // Auto-login anónimo para simplicidad
+                await firebase.auth().signInAnonymously();
+            }
             
-            // Configurar botón de sincronización
-            document.getElementById('sync-now').addEventListener('click', function() {
-                if (typeof syncPendingData === 'function') {
-                    syncPendingData();
-                } else if (window.offline && window.offline.sync) {
-                    window.offline.sync();
-                }
-            });
+            // Cargar datos del dashboard
+            await loadDashboardData();
             
-            // Actualizar contador de pendientes cada 5 segundos
-            setInterval(updatePendingCounter, 5000);
+            // Ocultar loading
+            document.getElementById('loading').style.display = 'none';
         });
         
-        async function loadDashboardData() {
-            try {
-                const db = firebase.firestore();
-                const today = new Date().toISOString().split('T')[0];
-                
-                // Cargar producción del día
-                const cosechasRef = db.collection('cosechas_diarias');
-                const cosechasHoy = await cosechasRef.where('fecha', '==', today).get();
-                let totalProduccion = 0;
-                let ultimaCosecha = '--:--';
-                
-                if (!cosechasHoy.empty) {
-                    cosechasHoy.forEach(doc => {
-                        const data = doc.data();
-                        totalProduccion += (data.primera || 0) + (data.segunda || 0) + (data.descarte || 0);
-                        if (data.timestamp) {
-                            const hora = new Date(data.timestamp.toDate()).toLocaleTimeString('es-GT', {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            });
-                            if (ultimaCosecha === '--:--' || data.timestamp.toDate() > new Date(ultimaCosecha)) {
-                                ultimaCosecha = hora;
-                            }
-                        }
-                    });
+        // Configurar botón de sincronización
+        document.getElementById('sync-now').addEventListener('click', function() {
+            if (typeof syncPendingData === 'function') {
+                syncPendingData();
+            }
+        });
+        
+        // Actualizar contador de pendientes cada 5 segundos
+        setInterval(updatePendingCounter, 5000);
+        updatePendingCounter(); // Inicializar
+    });
+    
+    // FUNCIÓN FALTANTE - Agregar esto
+    function updatePendingCounter() {
+        if (window.offline && typeof window.offline.getPendingCount === 'function') {
+            const count = window.offline.getPendingCount();
+            const badge = document.getElementById('pending-count');
+            const syncContainer = document.getElementById('sync-button-container');
+            
+            if (badge && syncContainer) {
+                badge.textContent = count;
+                if (count > 0) {
+                    syncContainer.classList.remove('hidden');
+                } else {
+                    syncContainer.classList.add('hidden');
                 }
-                
-                document.getElementById('produccion-hoy').textContent = totalProduccion + ' limones';
-                document.getElementById('ultima-cosecha').textContent = ultimaCosecha;
-                
-                // Cargar nivel del tanque (último registro)
-                const riegosRef = db.collection('riegos');
-                const ultimoRiego = await riegosRef.orderBy('timestamp', 'desc').limit(1).get();
-                
-                let nivelTanque = '25,000L';
-                let ultimoRiegoHora = '--:--';
-                
-                if (!ultimoRiego.empty) {
-                    const data = ultimoRiego.docs[0].data();
-                    nivelTanque = (data.nivel_tanque || 25000).toLocaleString() + 'L';
+            }
+        }
+    }
+    
+    async function loadDashboardData() {
+        try {
+            const db = firebase.firestore();
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Cargar producción del día
+            const cosechasRef = db.collection('cosechas_diarias');
+            const cosechasHoy = await cosechasRef.where('fecha', '==', today).get();
+            let totalProduccion = 0;
+            let ultimaCosecha = '--:--';
+            
+            if (!cosechasHoy.empty) {
+                cosechasHoy.forEach(doc => {
+                    const data = doc.data();
+                    totalProduccion += (data.primera || 0) + (data.segunda || 0) + (data.descarte || 0);
                     if (data.timestamp) {
-                        ultimoRiegoHora = new Date(data.timestamp.toDate()).toLocaleTimeString('es-GT', {
+                        const hora = new Date(data.timestamp.toDate()).toLocaleTimeString('es-GT', {
                             hour: '2-digit',
                             minute: '2-digit'
                         });
+                        if (ultimaCosecha === '--:--' || data.timestamp.toDate() > new Date(ultimaCosecha)) {
+                            ultimaCosecha = hora;
+                        }
                     }
-                }
-                
-                document.getElementById('tanque-nivel').textContent = nivelTanque;
-                document.getElementById('ultimo-riego').textContent = ultimoRiegoHora;
-                
-                // Contar árboles sanos
-                const arbolesRef = db.collection('arboles');
-                const arbolesSanos = await arbolesRef.where('estado_salud', '==', 'sano').get();
-                document.getElementById('arboles-sanos').textContent = arbolesSanos.size + ' de 800';
-                
-            } catch (error) {
-                console.error('Error cargando dashboard:', error);
-                // Mostrar datos offline si están disponibles
-                loadOfflineDashboardData();
+                });
             }
-        }
-        
-        function loadOfflineDashboardData() {
-            // Cargar datos básicos desde localStorage si no hay conexión
-            const offlineData = localStorage.getItem('dashboard_offline');
-            if (offlineData) {
-                const data = JSON.parse(offlineData);
-                document.getElementById('produccion-hoy').textContent = data.produccion || '0 limones';
-                document.getElementById('tanque-nivel').textContent = data.tanque || '25,000L';
-                document.getElementById('arboles-sanos').textContent = data.arboles || '800 de 800';
-            }
-        }
-        
-        // Registrar Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(registration => {
-                        console.log('SW registrado:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('SW falló:', error);
+            
+            document.getElementById('produccion-hoy').textContent = totalProduccion + ' limones';
+            document.getElementById('ultima-cosecha').textContent = ultimaCosecha;
+            
+            // Cargar nivel del tanque (último registro)
+            const riegosRef = db.collection('riegos');
+            const ultimoRiego = await riegosRef.orderBy('timestamp', 'desc').limit(1).get();
+            
+            let nivelTanque = '25,000L';
+            let ultimoRiegoHora = '--:--';
+            
+            if (!ultimoRiego.empty) {
+                const data = ultimoRiego.docs[0].data();
+                nivelTanque = (data.nivel_tanque || 25000).toLocaleString() + 'L';
+                if (data.timestamp) {
+                    ultimoRiegoHora = new Date(data.timestamp.toDate()).toLocaleTimeString('es-GT', {
+                        hour: '2-digit',
+                        minute: '2-digit'
                     });
-            });
+                }
+            }
+            
+            document.getElementById('tanque-nivel').textContent = nivelTanque;
+            document.getElementById('ultimo-riego').textContent = ultimoRiegoHora;
+            
+            // Contar árboles sanos
+            const arbolesRef = db.collection('arboles');
+            const arbolesSanos = await arbolesRef.where('estado_salud', '==', 'sano').get();
+            document.getElementById('arboles-sanos').textContent = arbolesSanos.size + ' de 800';
+            
+        } catch (error) {
+            console.error('Error cargando dashboard:', error);
+            // Mostrar datos offline si están disponibles
+            loadOfflineDashboardData();
         }
-    </script>
+    }
+    
+    function loadOfflineDashboardData() {
+        // Cargar datos básicos desde localStorage si no hay conexión
+        const offlineData = localStorage.getItem('dashboard_offline');
+        if (offlineData) {
+            const data = JSON.parse(offlineData);
+            document.getElementById('produccion-hoy').textContent = data.produccion || '0 limones';
+            document.getElementById('tanque-nivel').textContent = data.tanque || '25,000L';
+            document.getElementById('arboles-sanos').textContent = data.arboles || '800 de 800';
+        }
+    }
+    
+    // Registrar Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+                .then(registration => {
+                    console.log('SW registrado:', registration.scope);
+                })
+                .catch(error => {
+                    console.log('SW falló:', error);
+                });
+        });
+    }
+</script>
 </body>
 </html>
