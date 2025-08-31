@@ -4996,3 +4996,25 @@ textarea:focus-visible {
         print-color-adjust: exact;
     }
 }
+
+.sync-container {
+    position: fixed;
+    top: 70px;
+    right: 10px;
+    z-index: 1000;
+}
+
+.btn-sync {
+    background: #ff9800;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
+
