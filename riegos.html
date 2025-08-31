@@ -6,188 +6,661 @@
   <title>Riego · Finca La Herradura</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#7CB342" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <!-- Indicador de conectividad -->
-  <div id="connectivityIndicator" class="connectivity-indicator offline" aria-live="polite">
-    <span class="connectivity-dot"></span>
+  <!-- Indicador de conectividad mejorado -->
+  <div id="connectivityIndicator" class="connectivity-indicator offline" aria-live="polite" role="status">
+    <span class="connectivity-dot" aria-hidden="true"></span>
     <span id="connectivityText">Sin Internet</span>
-    <span id="pendingBadge" class="pending-badge hidden">0</span>
+    <span id="pendingBadge" class="pending-badge hidden" aria-label="Riegos pendientes">0</span>
   </div>
 
   <main class="page irrigation-page">
+    <!-- Header con gradiente mejorado -->
     <header class="page-header">
-      <h1>💧 Control de riego</h1>
-      <p class="subtitle">Tanque 25,000L · riego por árboles · programación sencilla</p>
+      <div class="header-content">
+        <div class="header-text">
+          <h1>💧 Control de Riego</h1>
+          <p class="subtitle">Gestión inteligente del sistema de irrigación</p>
+        </div>
+        <div class="header-actions">
+          <button id="syncBtn" class="btn-icon-header" aria-label="Sincronizar datos">
+            <span class="icon">🔄</span>
+          </button>
+          <button id="alertsBtn" class="btn-icon-header" aria-label="Ver alertas">
+            <span class="icon">🚨</span>
+            <span id="alertCount" class="notification-badge hidden">0</span>
+          </button>
+        </div>
+      </div>
     </header>
 
-    <!-- KPIs -->
-    <section class="stats-section">
-      <div class="stat-card">
-        <div class="stat-number" id="tankLevel">100%</div>
-        <div class="stat-label">Nivel del tanque</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="irrigationsToday">0</div>
-        <div class="stat-label">Riegos hoy</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="litersToday">0 L</div>
-        <div class="stat-label">Litros usados hoy</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="lastRefill">—</div>
-        <div class="stat-label">Último llenado</div>
-      </div>
-    </section>
-
-    <!-- Registro de riego -->
-    <section class="form-section">
-      <div class="card">
-        <div class="card-header">
-          <h2>📋 Registrar riego</h2>
+    <!-- KPIs con indicadores visuales mejorados -->
+    <section class="stats-section" role="region" aria-labelledby="stats-title">
+      <h2 id="stats-title" class="section-title visually-hidden">Estadísticas del sistema</h2>
+      
+      <div class="stat-card tank-level animate-on-load" style="--delay: 0.1s" data-level="100">
+        <div class="stat-icon">🛢️</div>
+        <div class="stat-content">
+          <div class="stat-number" id="tankLevel">100%</div>
+          <div class="stat-label">Nivel del tanque</div>
+          <div class="tank-visual">
+            <div class="tank-container">
+              <div class="tank-fill" style="height: 100%"></div>
+              <div class="tank-label">25,000L</div>
+            </div>
+          </div>
         </div>
-        <div class="card-body">
-          <div class="row">
-            <label class="label" for="treeSearch">Árboles regados</label>
-            <input id="treeSearch" class="input" type="search" placeholder="Buscar ARB001…ARB800" />
-          </div>
-
-          <div id="treeGrid" class="tree-grid compact" role="list" aria-label="Selector de árboles">
-            <!-- ARB001..ARB800 -->
-          </div>
-          <div class="row tiny">
-            <small>Seleccionados: <strong id="selectedCount">0</strong></small>
-          </div>
-
-          <div class="row">
-            <label class="label" for="litersInput">Litros utilizados</label>
-            <input id="litersInput" class="number-input" type="number" inputmode="decimal" step="1" min="1" placeholder="Ej. 200" />
-            <small class="muted">Se descuenta del tanque (25,000L).</small>
-          </div>
-
-          <div class="row two-col">
-            <div>
-              <label class="label" for="startTime">Inicio (opcional)</label>
-              <input id="startTime" class="input" type="time" />
-            </div>
-            <div>
-              <label class="label" for="endTime">Fin (opcional)</label>
-              <input id="endTime" class="input" type="time" />
-            </div>
-          </div>
-
-          <div class="row">
-            <label class="label" for="workerSelect">Trabajador</label>
-            <select id="workerSelect" class="select">
-              <option value="trabajador1">Trabajador 1</option>
-              <option value="trabajador2">Trabajador 2</option>
-            </select>
-          </div>
-
-          <div class="row">
-            <label class="label" for="notes">Observaciones</label>
-            <textarea id="notes" class="input" rows="2" placeholder="Ej. Sector A, suelo seco."></textarea>
-          </div>
-
-          <div class="row row-actions">
-            <button id="saveIrrigationBtn" class="button primary">💾 Guardar riego</button>
-            <button id="syncBtn" class="button">🔄 Sincronizar</button>
-          </div>
+        <div class="stat-alert" id="tankAlert">
+          <span class="alert-icon">✅</span>
+        </div>
+      </div>
+      
+      <div class="stat-card animate-on-load" style="--delay: 0.2s">
+        <div class="stat-icon">🌊</div>
+        <div class="stat-content">
+          <div class="stat-number" id="irrigationsToday">0</div>
+          <div class="stat-label">Riegos hoy</div>
+          <div class="stat-meta" id="irrigationsMeta">0 programados</div>
+        </div>
+      </div>
+      
+      <div class="stat-card animate-on-load" style="--delay: 0.3s">
+        <div class="stat-icon">💧</div>
+        <div class="stat-content">
+          <div class="stat-number" id="litersToday">0 L</div>
+          <div class="stat-label">Litros usados</div>
+          <div class="stat-meta" id="litersAverage">Prom: 0 L/día</div>
+        </div>
+      </div>
+      
+      <div class="stat-card animate-on-load" style="--delay: 0.4s">
+        <div class="stat-icon">⏰</div>
+        <div class="stat-content">
+          <div class="stat-number" id="lastRefill">—</div>
+          <div class="stat-label">Último llenado</div>
+          <div class="stat-meta" id="refillDays">— días</div>
         </div>
       </div>
     </section>
 
-    <!-- Llenado del tanque -->
-    <section class="form-section">
-      <div class="card">
+    <!-- Registro de riego mejorado -->
+    <section class="form-section animate-on-load" style="--delay: 0.5s" role="region" aria-labelledby="irrigation-form-title">
+      <div class="card modern-card">
         <div class="card-header">
-          <h2>🛢️ Llenar tanque</h2>
+          <h2 id="irrigation-form-title">📋 Registrar Riego</h2>
+          <div class="form-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 0%"></div>
+            </div>
+            <span class="progress-text">0% completado</span>
+          </div>
         </div>
         <div class="card-body">
-          <div class="row">
-            <label class="label" for="refillPercent">Nivel objetivo</label>
-            <input id="refillPercent" class="number-input" type="number" inputmode="numeric" min="1" max="100" value="100" />
-            <small class="muted">Ajusta a 100% después de rellenar el tanque.</small>
+          <form id="irrigationForm" novalidate>
+            <!-- Selección de árboles -->
+            <div class="tree-selection-section">
+              <div class="form-group">
+                <label class="label required" for="treeSearch">
+                  <span class="label-icon">🌳</span>
+                  Árboles a regar
+                </label>
+                <div class="tree-controls">
+                  <div class="input-wrapper">
+                    <input id="treeSearch" 
+                           class="input modern-input" 
+                           type="search" 
+                           placeholder="Buscar ARB001…ARB800 o usar rangos"
+                           autocomplete="off"
+                           aria-describedby="tree-search-help" />
+                    <div class="input-icon">🔍</div>
+                  </div>
+                  <div id="tree-search-help" class="input-help">
+                    Ejemplos: ARB150, 100-200, A1-A50
+                  </div>
+                  
+                  <div class="tree-quick-actions">
+                    <button type="button" id="selectSectorBtn" class="btn-quick">
+                      <span class="btn-icon">🏗️</span>
+                      Por sector
+                    </button>
+                    <button type="button" id="selectAllTreesBtn" class="btn-quick">
+                      <span class="btn-icon">👆</span>
+                      Todos
+                    </button>
+                    <button type="button" id="clearTreesBtn" class="btn-quick">
+                      <span class="btn-icon">🧹</span>
+                      Limpiar
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Grid de árboles compacto -->
+              <div class="tree-selection-area compact">
+                <div class="tree-counter-header">
+                  <span class="counter-label">Seleccionados:</span>
+                  <span id="selectedCount" class="counter-value">0 árboles</span>
+                  <div class="sector-tags" id="sectorTags"></div>
+                </div>
+                
+                <div id="treeGrid" 
+                     class="tree-grid compact irrigation-grid" 
+                     role="grid" 
+                     aria-label="Selección de árboles para riego"
+                     aria-multiselectable="true">
+                  <!-- Los árboles se cargarán dinámicamente -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Detalles del riego -->
+            <div class="irrigation-details">
+              <div class="form-group-row">
+                <div class="form-group">
+                  <label class="label required" for="litersInput">
+                    <span class="label-icon">💧</span>
+                    Litros utilizados
+                  </label>
+                  <div class="number-input-wrapper">
+                    <input id="litersInput" 
+                           class="number-input modern-input" 
+                           type="number" 
+                           inputmode="numeric" 
+                           step="1" 
+                           min="1" 
+                           max="25000"
+                           placeholder="Ej. 200"
+                           required
+                           aria-describedby="liters-help liters-error" />
+                    <div class="input-unit">L</div>
+                    <div class="input-controls">
+                      <button type="button" class="btn-stepper" data-action="increment" data-target="litersInput">+</button>
+                      <button type="button" class="btn-stepper" data-action="decrement" data-target="litersInput">-</button>
+                    </div>
+                  </div>
+                  <div class="quick-amounts">
+                    <button type="button" class="btn-quick" data-add="#litersInput" data-val="50">+50L</button>
+                    <button type="button" class="btn-quick" data-add="#litersInput" data-val="100">+100L</button>
+                    <button type="button" class="btn-quick" data-add="#litersInput" data-val="200">+200L</button>
+                  </div>
+                  <div id="liters-help" class="input-help tank-status">
+                    <span id="tankRemaining">Tanque: 25,000L disponibles</span>
+                  </div>
+                  <div id="liters-error" class="error-message hidden" role="alert"></div>
+                </div>
+
+                <div class="form-group">
+                  <label class="label" for="workerSelect">
+                    <span class="label-icon">👷</span>
+                    Trabajador responsable
+                  </label>
+                  <div class="select-wrapper">
+                    <select id="workerSelect" class="select modern-select" aria-describedby="worker-help">
+                      <option value="">Seleccionar trabajador...</option>
+                      <option value="trabajador1">👨‍🌾 Trabajador 1</option>
+                      <option value="trabajador2">👨‍🌾 Trabajador 2</option>
+                      <option value="nestor">👨‍💼 Nestor (Supervisor)</option>
+                      <option value="otro">👤 Otro</option>
+                    </select>
+                    <div class="select-icon">⬇️</div>
+                  </div>
+                  <div id="worker-help" class="input-help">
+                    Persona que ejecuta el riego
+                  </div>
+                </div>
+              </div>
+
+              <!-- Horarios -->
+              <div class="form-group">
+                <label class="label" for="startTime">
+                  <span class="label-icon">⏰</span>
+                  Horarios del riego
+                  <span class="label-optional">(opcional)</span>
+                </label>
+                <div class="time-range-wrapper">
+                  <div class="time-inputs">
+                    <div class="time-input-group">
+                      <label class="time-label">Inicio</label>
+                      <input id="startTime" 
+                             class="input modern-input time-input" 
+                             type="time" 
+                             aria-label="Hora de inicio" />
+                    </div>
+                    <div class="time-separator">⏱️</div>
+                    <div class="time-input-group">
+                      <label class="time-label">Fin</label>
+                      <input id="endTime" 
+                             class="input modern-input time-input" 
+                             type="time" 
+                             aria-label="Hora de fin" />
+                    </div>
+                  </div>
+                  <button type="button" id="setCurrentTimeBtn" class="btn-quick">
+                    <span class="btn-icon">🕐</span>
+                    Iniciar ahora
+                  </button>
+                </div>
+                <div id="duration-display" class="input-help hidden">
+                  Duración estimada: <span id="durationText">—</span>
+                </div>
+              </div>
+
+              <!-- Observaciones -->
+              <div class="form-group">
+                <label class="label" for="notes">
+                  <span class="label-icon">📝</span>
+                  Observaciones
+                  <span class="label-optional">(opcional)</span>
+                </label>
+                <div class="textarea-wrapper">
+                  <textarea id="notes" 
+                            class="textarea modern-input" 
+                            rows="3" 
+                            placeholder="Ej. Sector A, suelo seco, presión normal..."
+                            maxlength="200"
+                            aria-describedby="notes-counter"></textarea>
+                  <div id="notes-counter" class="character-counter">0/200</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Resumen del riego -->
+            <div id="irrigationSummary" class="irrigation-summary hidden">
+              <h3 class="summary-title">💧 Resumen del Riego</h3>
+              <div class="summary-grid">
+                <div class="summary-item">
+                  <span class="summary-label">Árboles:</span>
+                  <span id="summaryTrees">0 seleccionados</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Litros:</span>
+                  <span id="summaryLiters">0 L</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">L/árbol:</span>
+                  <span id="summaryPerTree">0 L</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Tanque después:</span>
+                  <span id="summaryTankAfter">100%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="form-actions">
+              <button type="submit" id="saveIrrigationBtn" class="btn btn-primary btn-large">
+                <span class="btn-icon">💾</span>
+                <span class="btn-text">Registrar Riego</span>
+                <div class="btn-loading hidden">
+                  <div class="spinner"></div>
+                </div>
+              </button>
+              
+              <div class="secondary-actions">
+                <button type="button" id="clearFormBtn" class="btn btn-outline">
+                  <span class="btn-icon">🧹</span>
+                  Limpiar
+                </button>
+                <button type="button" id="scheduleBtn" class="btn btn-secondary">
+                  <span class="btn-icon">📅</span>
+                  Programar
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Llenado del tanque mejorado -->
+    <section class="form-section animate-on-load" style="--delay: 0.6s" role="region" aria-labelledby="refill-form-title">
+      <div class="card modern-card">
+        <div class="card-header">
+          <h2 id="refill-form-title">🛢️ Gestión del Tanque</h2>
+          <div class="tank-status-indicator">
+            <div class="status-light" id="tankStatusLight"></div>
+            <span id="tankStatusText">Normal</span>
           </div>
-          <div class="row row-actions">
-            <button id="saveRefillBtn" class="button">⛽ Registrar llenado</button>
+        </div>
+        <div class="card-body">
+          <div class="tank-management-grid">
+            <!-- Llenado -->
+            <div class="tank-action-card">
+              <div class="action-header">
+                <h3>⛽ Llenar Tanque</h3>
+              </div>
+              <form id="refillForm">
+                <div class="form-group">
+                  <label class="label required" for="refillPercent">
+                    <span class="label-icon">📊</span>
+                    Nivel objetivo
+                  </label>
+                  <div class="percentage-input-wrapper">
+                    <input id="refillPercent" 
+                           class="number-input modern-input" 
+                           type="number" 
+                           inputmode="numeric" 
+                           min="1" 
+                           max="100" 
+                           value="100"
+                           required />
+                    <div class="input-unit">%</div>
+                  </div>
+                  <div class="percentage-buttons">
+                    <button type="button" class="btn-quick" data-set="#refillPercent" data-val="50">50%</button>
+                    <button type="button" class="btn-quick" data-set="#refillPercent" data-val="75">75%</button>
+                    <button type="button" class="btn-quick" data-set="#refillPercent" data-val="100">100%</button>
+                  </div>
+                  <div class="volume-info">
+                    <span id="refillLiters">25,000 L</span>
+                  </div>
+                </div>
+                <button type="submit" id="saveRefillBtn" class="btn btn-primary">
+                  <span class="btn-icon">⛽</span>
+                  Registrar Llenado
+                </button>
+              </form>
+            </div>
+
+            <!-- Mantenimiento -->
+            <div class="tank-action-card">
+              <div class="action-header">
+                <h3>🔧 Mantenimiento</h3>
+              </div>
+              <div class="maintenance-actions">
+                <button id="cleanTankBtn" class="btn btn-outline maintenance-btn">
+                  <span class="btn-icon">🧽</span>
+                  Limpiar tanque
+                </button>
+                <button id="inspectTankBtn" class="btn btn-outline maintenance-btn">
+                  <span class="btn-icon">🔍</span>
+                  Inspeccionar
+                </button>
+                <button id="calibrateBtn" class="btn btn-outline maintenance-btn">
+                  <span class="btn-icon">⚖️</span>
+                  Calibrar nivel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Programación simple -->
-    <section class="form-section">
-      <div class="card">
+    <!-- Programación mejorada -->
+    <section class="form-section animate-on-load" style="--delay: 0.7s" role="region" aria-labelledby="schedule-form-title">
+      <div class="card modern-card">
         <div class="card-header">
-          <h2>⏰ Programar riego</h2>
+          <h2 id="schedule-form-title">⏰ Programación de Riegos</h2>
+          <div class="schedule-counter">
+            <span id="activeSchedules" class="pill pill-ok">0 programados</span>
+          </div>
         </div>
         <div class="card-body">
-          <div class="row two-col">
-            <div>
-              <label class="label" for="scheduleDate">Fecha</label>
-              <input id="scheduleDate" class="input" type="date" />
+          <form id="scheduleForm" novalidate>
+            <div class="form-group-row">
+              <div class="form-group">
+                <label class="label required" for="scheduleDate">
+                  <span class="label-icon">📅</span>
+                  Fecha programada
+                </label>
+                <div class="input-wrapper">
+                  <input id="scheduleDate" 
+                         class="input modern-input" 
+                         type="date" 
+                         required
+                         aria-describedby="date-error" />
+                  <div class="input-icon">📆</div>
+                </div>
+                <div id="date-error" class="error-message hidden" role="alert"></div>
+              </div>
+              
+              <div class="form-group">
+                <label class="label required" for="scheduleTime">
+                  <span class="label-icon">🕐</span>
+                  Hora programada
+                </label>
+                <div class="input-wrapper">
+                  <input id="scheduleTime" 
+                         class="input modern-input" 
+                         type="time" 
+                         required
+                         aria-describedby="time-error" />
+                  <div class="input-icon">⏰</div>
+                </div>
+                <div id="time-error" class="error-message hidden" role="alert"></div>
+              </div>
             </div>
-            <div>
-              <label class="label" for="scheduleTime">Hora</label>
-              <input id="scheduleTime" class="input" type="time" />
+
+            <div class="form-group">
+              <label class="label required" for="scheduleNote">
+                <span class="label-icon">📝</span>
+                Descripción del riego
+              </label>
+              <div class="input-wrapper">
+                <input id="scheduleNote" 
+                       class="input modern-input" 
+                       type="text" 
+                       placeholder="Ej. Regar Sector B (150 árboles)"
+                       required
+                       maxlength="100"
+                       aria-describedby="note-error" />
+                <div class="input-icon">📋</div>
+              </div>
+              <div id="note-error" class="error-message hidden" role="alert"></div>
             </div>
-          </div>
-          <div class="row">
-            <label class="label" for="scheduleNote">Nota</label>
-            <input id="scheduleNote" class="input" type="text" placeholder="Ej. Regar Sector B (150 árboles)" />
-          </div>
-          <div class="row row-actions">
-            <button id="saveScheduleBtn" class="button">🗓️ Guardar recordatorio</button>
-          </div>
+
+            <div class="form-group">
+              <label class="label" for="schedulePriority">
+                <span class="label-icon">⚡</span>
+                Prioridad
+              </label>
+              <div class="priority-selector">
+                <input type="radio" id="priorityLow" name="priority" value="baja" class="priority-radio">
+                <label for="priorityLow" class="priority-label low">🔵 Baja</label>
+                
+                <input type="radio" id="priorityMedium" name="priority" value="media" class="priority-radio" checked>
+                <label for="priorityMedium" class="priority-label medium">🟡 Media</label>
+                
+                <input type="radio" id="priorityHigh" name="priority" value="alta" class="priority-radio">
+                <label for="priorityHigh" class="priority-label high">🔴 Alta</label>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" id="saveScheduleBtn" class="btn btn-primary">
+                <span class="btn-icon">🗓️</span>
+                Programar Riego
+              </button>
+              <button type="button" id="viewSchedulesBtn" class="btn btn-secondary">
+                <span class="btn-icon">📋</span>
+                Ver Programados
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </section>
 
-    <!-- Historial de hoy -->
-    <section class="list-section">
-      <div class="card">
+    <!-- Lista de riegos mejorada -->
+    <section class="list-section animate-on-load" style="--delay: 0.8s" role="region" aria-labelledby="irrigations-list-title">
+      <div class="card modern-card">
         <div class="card-header">
-          <h2>📜 Riegos de hoy</h2>
+          <h2 id="irrigations-list-title">📜 Historial de Riegos</h2>
+          <div class="list-controls">
+            <button id="filterDayBtn" class="btn-icon-small active" aria-label="Ver riegos de hoy">
+              <span class="icon">📅</span>
+            </button>
+            <button id="filterWeekBtn" class="btn-icon-small" aria-label="Ver riegos de la semana">
+              <span class="icon">📆</span>
+            </button>
+            <button id="exportBtn" class="btn-icon-small" aria-label="Exportar historial">
+              <span class="icon">📤</span>
+            </button>
+          </div>
         </div>
         <div class="card-body">
-          <div class="list list-header">
-            <div class="list-cell">Hora</div>
-            <div class="list-cell">Árboles</div>
-            <div class="list-cell">Litros</div>
-            <div class="list-cell">Tanque</div>
+          <!-- Resumen del período -->
+          <div class="irrigation-period-summary">
+            <div class="period-info">
+              <h3 id="periodTitle">Riegos de Hoy</h3>
+              <span id="periodDate" class="period-date"></span>
+            </div>
+            <div class="period-stats">
+              <div class="period-stat">
+                <span class="stat-value" id="periodRiegos">0</span>
+                <span class="stat-label">riegos</span>
+              </div>
+              <div class="period-stat">
+                <span class="stat-value" id="periodLitros">0L</span>
+                <span class="stat-label">total</span>
+              </div>
+            </div>
           </div>
-          <div id="irrigationsList" class="list"></div>
+          
+          <!-- Tabla responsive -->
+          <div class="table-responsive">
+            <div class="table-header">
+              <div class="table-cell">Hora</div>
+              <div class="table-cell">Árboles</div>
+              <div class="table-cell">Litros</div>
+              <div class="table-cell">Tanque</div>
+              <div class="table-cell">Trabajador</div>
+              <div class="table-cell">Acciones</div>
+            </div>
+            <div id="irrigationsList" class="table-body">
+              <!-- Los riegos se cargarán aquí dinámicamente -->
+              <div class="empty-state">
+                <div class="empty-icon">💧</div>
+                <p class="empty-message">No hay riegos registrados hoy</p>
+                <p class="empty-submessage">Los riegos que registres aparecerán aquí</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- Firebase compat (CDN) -->
+  <!-- Toast notifications -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Modal para selección de sectores -->
+  <div id="sectorModal" class="modal hidden" role="dialog" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🏗️ Seleccionar por Sector</h3>
+        <button class="modal-close" aria-label="Cerrar modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="sector-grid">
+          <button class="sector-btn" data-sector="A">
+            <div class="sector-label">Sector A</div>
+            <div class="sector-range">ARB001-ARB200</div>
+            <div class="sector-count">200 árboles</div>
+          </button>
+          <button class="sector-btn" data-sector="B">
+            <div class="sector-label">Sector B</div>
+            <div class="sector-range">ARB201-ARB400</div>
+            <div class="sector-count">200 árboles</div>
+          </button>
+          <button class="sector-btn" data-sector="C">
+            <div class="sector-label">Sector C</div>
+            <div class="sector-range">ARB401-ARB600</div>
+            <div class="sector-count">200 árboles</div>
+          </button>
+          <button class="sector-btn" data-sector="D">
+            <div class="sector-label">Sector D</div>
+            <div class="sector-range">ARB601-ARB800</div>
+            <div class="sector-count">200 árboles</div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
-  <!-- Config y offline -->
   <script src="js/firebase-config.js"></script>
   <script src="js/auth.js"></script> 
   <script src="js/offline.js"></script>
-
-   <!-- Nav común -->
   <script src="js/nav.js"></script>
-
-  <!-- Lógica -->
   <script src="js/riegos.js"></script>
 
- 
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js', { scope: './' });
+    }
 
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js', { scope: './' }); // ← relativo y con scope
-}
-</script>
+    // Inicialización
+    document.addEventListener('DOMContentLoaded', function() {
+      // Animaciones de carga
+      const animatedElements = document.querySelectorAll('.animate-on-load');
+      animatedElements.forEach((el, index) => {
+        setTimeout(() => {
+          el.classList.add('animate-in');
+        }, index * 100);
+      });
+
+      // Fecha actual por defecto
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('scheduleDate').value = today;
+      
+      // Inicializar estado del tanque
+      updateTankStatus(100);
+      
+      // Configurar fecha del período
+      updatePeriodInfo('today');
+    });
+
+    // Funciones auxiliares
+    function updateTankStatus(level) {
+      const tankFill = document.querySelector('.tank-fill');
+      const tankAlert = document.getElementById('tankAlert');
+      const statusLight = document.getElementById('tankStatusLight');
+      
+      if (tankFill) tankFill.style.height = level + '%';
+      
+      if (level < 20) {
+        tankAlert.innerHTML = '<span class="alert-icon">🚨</span>';
+        statusLight.className = 'status-light critical';
+      } else if (level < 50) {
+        tankAlert.innerHTML = '<span class="alert-icon">⚠️</span>';
+        statusLight.className = 'status-light warning';
+      } else {
+        tankAlert.innerHTML = '<span class="alert-icon">✅</span>';
+        statusLight.className = 'status-light normal';
+      }
+    }
+    
+    function updatePeriodInfo(period) {
+      const periodTitle = document.getElementById('periodTitle');
+      const periodDate = document.getElementById('periodDate');
+      const today = new Date();
+      
+      if (period === 'today') {
+        periodTitle.textContent = 'Riegos de Hoy';
+        periodDate.textContent = today.toLocaleDateString('es-GT', {
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric'
+        });
+      } else {
+        periodTitle.textContent = 'Riegos de la Semana';
+        periodDate.textContent = 'Últimos 7 días';
+      }
+    }
+  </script>
 </body>
 </html>
-
