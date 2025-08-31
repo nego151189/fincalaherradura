@@ -6,148 +6,318 @@
   <title>Ventas · Finca La Herradura</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#7CB342" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <!-- Indicador de conectividad -->
-  <div id="connectivityIndicator" class="connectivity-indicator offline" aria-live="polite">
-    <span class="connectivity-dot"></span>
+  <!-- Indicador de conectividad mejorado -->
+  <div id="connectivityIndicator" class="connectivity-indicator offline" aria-live="polite" role="status">
+    <span class="connectivity-dot" aria-hidden="true"></span>
     <span id="connectivityText">Sin Internet</span>
-    <span id="pendingBadge" class="pending-badge hidden">0</span>
+    <span id="pendingBadge" class="pending-badge hidden" aria-label="Ventas pendientes">0</span>
   </div>
 
   <main class="page sales-page">
+    <!-- Header con gradiente mejorado -->
     <header class="page-header">
-      <h1>💰 Ventas directas</h1>
-      <p class="subtitle">Cliente · unidades · precio por unidad · forma de pago</p>
+      <div class="header-content">
+        <div class="header-text">
+          <h1>💰 Ventas Directas</h1>
+          <p class="subtitle">Gestión completa de ventas en campo</p>
+        </div>
+        <div class="header-actions">
+          <button id="syncBtn" class="btn-icon-header" aria-label="Sincronizar datos">
+            <span class="icon">🔄</span>
+          </button>
+        </div>
+      </div>
     </header>
 
-    <!-- KPIs del día -->
-    <section class="stats-section">
-      <div class="stat-card">
-        <div class="stat-number" id="kpiSalesCount">0</div>
-        <div class="stat-label">Ventas hoy</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="kpiUnitsSold">0</div>
-        <div class="stat-label">Unidades vendidas</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="kpiRevenue">Q0</div>
-        <div class="stat-label">Ingresos hoy</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="kpiAvgPrice">Q0.00</div>
-        <div class="stat-label">Precio promedio</div>
-      </div>
-    </section>
-
-    <!-- Formulario de venta -->
-    <section class="form-section">
-      <div class="card">
-        <div class="card-header">
-          <h2>🧾 Registrar venta</h2>
+    <!-- KPIs del día con animaciones -->
+    <section class="stats-section" role="region" aria-labelledby="stats-title">
+      <h2 id="stats-title" class="section-title visually-hidden">Estadísticas del día</h2>
+      <div class="stat-card animate-on-load" style="--delay: 0.1s">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+          <div class="stat-number" id="kpiSalesCount">0</div>
+          <div class="stat-label">Ventas hoy</div>
         </div>
-        <div class="card-body">
-          <div class="row two-col">
-            <div>
-              <label class="label" for="clientName">Cliente</label>
-              <input id="clientName" class="input" type="text" placeholder="Ej. Mercado Zona 4" />
-            </div>
-            <div>
-              <label class="label" for="quality">Calidad</label>
-              <select id="quality" class="select">
-                <option value="primera">Primera</option>
-                <option value="segunda">Segunda</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="row three-col">
-            <div>
-              <label class="label" for="units">Unidades</label>
-              <input id="units" class="number-input" type="number" inputmode="numeric" min="1" value="100" />
-              <div class="btn-bar">
-                <button class="button mini" data-add="#units" data-val="50">+50</button>
-                <button class="button mini" data-add="#units" data-val="100">+100</button>
-                <button class="button mini" data-add="#units" data-val="-50">-50</button>
-              </div>
-            </div>
-
-            <div>
-              <label class="label" for="unitPrice">Precio por unidad (Q)</label>
-              <input id="unitPrice" class="number-input" type="number" inputmode="decimal" min="0" step="0.01" value="0.40" />
-              <div class="btn-bar">
-                <button id="btnMaga1" class="button mini">MAGA 1ª</button>
-                <button id="btnMaga2" class="button mini">MAGA 2ª</button>
-              </div>
-            </div>
-
-            <div>
-              <label class="label" for="payment">Forma de pago</label>
-              <select id="payment" class="select">
-                <option value="efectivo">Efectivo</option>
-                <option value="transferencia">Transferencia</option>
-                <option value="otro">Otro</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="row">
-            <label class="label">Total (Q)</label>
-            <div id="totalBox" class="pill">Q0.00</div>
-          </div>
-
-          <div class="row">
-            <label class="label" for="notes">Observaciones</label>
-            <textarea id="notes" class="input" rows="2" placeholder="Ej. Entrega sábado a las 6am"></textarea>
-          </div>
-
-          <div class="row row-actions">
-            <button id="saveSaleBtn" class="button primary">💾 Guardar venta</button>
-            <button id="syncBtn" class="button">🔄 Sincronizar</button>
-            <button id="clearBtn" class="button">🧹 Limpiar</button>
-          </div>
+      </div>
+      <div class="stat-card animate-on-load" style="--delay: 0.2s">
+        <div class="stat-icon">📦</div>
+        <div class="stat-content">
+          <div class="stat-number" id="kpiUnitsSold">0</div>
+          <div class="stat-label">Unidades vendidas</div>
+        </div>
+      </div>
+      <div class="stat-card animate-on-load" style="--delay: 0.3s">
+        <div class="stat-icon">💵</div>
+        <div class="stat-content">
+          <div class="stat-number" id="kpiRevenue">Q0</div>
+          <div class="stat-label">Ingresos hoy</div>
+        </div>
+      </div>
+      <div class="stat-card animate-on-load" style="--delay: 0.4s">
+        <div class="stat-icon">📈</div>
+        <div class="stat-content">
+          <div class="stat-number" id="kpiAvgPrice">Q0.00</div>
+          <div class="stat-label">Precio promedio</div>
         </div>
       </div>
     </section>
 
-    <!-- Lista de ventas de hoy -->
-    <section class="list-section">
-      <div class="card">
+    <!-- Formulario de venta mejorado -->
+    <section class="form-section animate-on-load" style="--delay: 0.5s" role="region" aria-labelledby="form-title">
+      <div class="card modern-card">
         <div class="card-header">
-          <h2>📜 Ventas de hoy</h2>
+          <h2 id="form-title">🧾 Nueva Venta</h2>
+          <div class="form-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 0%"></div>
+            </div>
+            <span class="progress-text">0% completado</span>
+          </div>
         </div>
         <div class="card-body">
-          <div class="list list-header">
-            <div class="list-cell">Hora</div>
-            <div class="list-cell">Cliente</div>
-            <div class="list-cell">Calidad</div>
-            <div class="list-cell">Unid</div>
-            <div class="list-cell">P/U</div>
-            <div class="list-cell">Total</div>
+          <form id="salesForm" novalidate>
+            <!-- Cliente y Calidad -->
+            <div class="form-group-row">
+              <div class="form-group">
+                <label class="label required" for="clientName">
+                  <span class="label-icon">👤</span>
+                  Cliente
+                </label>
+                <div class="input-wrapper">
+                  <input id="clientName" class="input modern-input" type="text" 
+                         placeholder="Ej. Mercado Zona 4" 
+                         required
+                         autocomplete="organization"
+                         aria-describedby="clientName-error" />
+                  <div class="input-icon">🏪</div>
+                </div>
+                <div id="clientName-error" class="error-message hidden" role="alert"></div>
+              </div>
+              
+              <div class="form-group">
+                <label class="label required" for="quality">
+                  <span class="label-icon">⭐</span>
+                  Calidad
+                </label>
+                <div class="select-wrapper">
+                  <select id="quality" class="select modern-select" required aria-describedby="quality-error">
+                    <option value="">Seleccionar...</option>
+                    <option value="primera">Primera Calidad</option>
+                    <option value="segunda">Segunda Calidad</option>
+                  </select>
+                  <div class="select-icon">⬇️</div>
+                </div>
+                <div id="quality-error" class="error-message hidden" role="alert"></div>
+              </div>
+            </div>
+
+            <!-- Cantidad, Precio y Pago -->
+            <div class="form-group-row three-cols">
+              <div class="form-group">
+                <label class="label required" for="units">
+                  <span class="label-icon">📦</span>
+                  Unidades
+                </label>
+                <div class="number-input-wrapper">
+                  <input id="units" class="number-input modern-input" 
+                         type="number" 
+                         inputmode="numeric" 
+                         min="1" 
+                         max="9999"
+                         value="100" 
+                         required
+                         aria-describedby="units-error" />
+                  <div class="input-controls">
+                    <button type="button" class="btn-stepper" data-action="increment" data-target="units" aria-label="Incrementar unidades">+</button>
+                    <button type="button" class="btn-stepper" data-action="decrement" data-target="units" aria-label="Decrementar unidades">-</button>
+                  </div>
+                </div>
+                <div class="quick-amounts">
+                  <button type="button" class="btn-quick" data-add="#units" data-val="50">+50</button>
+                  <button type="button" class="btn-quick" data-add="#units" data-val="100">+100</button>
+                  <button type="button" class="btn-quick" data-add="#units" data-val="-50">-50</button>
+                </div>
+                <div id="units-error" class="error-message hidden" role="alert"></div>
+              </div>
+
+              <div class="form-group">
+                <label class="label required" for="unitPrice">
+                  <span class="label-icon">💰</span>
+                  Precio/Unidad (Q)
+                </label>
+                <div class="number-input-wrapper">
+                  <input id="unitPrice" class="number-input modern-input" 
+                         type="number" 
+                         inputmode="decimal" 
+                         min="0" 
+                         step="0.01" 
+                         value="0.40" 
+                         required
+                         aria-describedby="unitPrice-error" />
+                  <div class="currency-symbol">Q</div>
+                </div>
+                <div class="quick-prices">
+                  <button type="button" id="btnMaga1" class="btn-preset">MAGA 1ª</button>
+                  <button type="button" id="btnMaga2" class="btn-preset">MAGA 2ª</button>
+                </div>
+                <div id="unitPrice-error" class="error-message hidden" role="alert"></div>
+              </div>
+
+              <div class="form-group">
+                <label class="label required" for="payment">
+                  <span class="label-icon">💳</span>
+                  Forma de pago
+                </label>
+                <div class="select-wrapper">
+                  <select id="payment" class="select modern-select" required aria-describedby="payment-error">
+                    <option value="">Seleccionar...</option>
+                    <option value="efectivo">💵 Efectivo</option>
+                    <option value="transferencia">🏦 Transferencia</option>
+                    <option value="credito">📝 Crédito</option>
+                    <option value="otro">🔧 Otro</option>
+                  </select>
+                  <div class="select-icon">⬇️</div>
+                </div>
+                <div id="payment-error" class="error-message hidden" role="alert"></div>
+              </div>
+            </div>
+
+            <!-- Total destacado -->
+            <div class="form-group">
+              <div class="total-section">
+                <label class="total-label">Total a pagar</label>
+                <div id="totalBox" class="total-amount">Q0.00</div>
+                <div class="total-breakdown hidden">
+                  <span id="totalBreakdown"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Observaciones -->
+            <div class="form-group">
+              <label class="label" for="notes">
+                <span class="label-icon">📝</span>
+                Observaciones
+                <span class="label-optional">(opcional)</span>
+              </label>
+              <div class="textarea-wrapper">
+                <textarea id="notes" class="textarea modern-input" 
+                          rows="3" 
+                          placeholder="Ej. Entrega sábado a las 6am, incluir factura..."
+                          maxlength="200"
+                          aria-describedby="notes-counter"></textarea>
+                <div id="notes-counter" class="character-counter">0/200</div>
+              </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="form-actions">
+              <button type="submit" id="saveSaleBtn" class="btn btn-primary btn-large">
+                <span class="btn-icon">💾</span>
+                <span class="btn-text">Guardar Venta</span>
+                <div class="btn-loading hidden">
+                  <div class="spinner"></div>
+                </div>
+              </button>
+              
+              <div class="secondary-actions">
+                <button type="button" id="clearBtn" class="btn btn-outline">
+                  <span class="btn-icon">🧹</span>
+                  Limpiar
+                </button>
+                <button type="button" id="draftBtn" class="btn btn-secondary">
+                  <span class="btn-icon">📄</span>
+                  Borrador
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lista de ventas mejorada -->
+    <section class="list-section animate-on-load" style="--delay: 0.6s" role="region" aria-labelledby="sales-list-title">
+      <div class="card modern-card">
+        <div class="card-header">
+          <h2 id="sales-list-title">📜 Ventas de Hoy</h2>
+          <div class="list-controls">
+            <button id="filterBtn" class="btn-icon-small" aria-label="Filtrar ventas">
+              <span class="icon">🔍</span>
+            </button>
+            <button id="exportBtn" class="btn-icon-small" aria-label="Exportar ventas">
+              <span class="icon">📤</span>
+            </button>
           </div>
-          <div id="salesList" class="list"></div>
+        </div>
+        <div class="card-body">
+          <div class="sales-summary">
+            <div class="summary-item">
+              <span class="summary-label">Total del día:</span>
+              <span id="dailyTotal" class="summary-value">Q0.00</span>
+            </div>
+          </div>
+          
+          <div class="table-responsive">
+            <div class="table-header">
+              <div class="table-cell">Hora</div>
+              <div class="table-cell">Cliente</div>
+              <div class="table-cell">Calidad</div>
+              <div class="table-cell">Unidades</div>
+              <div class="table-cell">P/U</div>
+              <div class="table-cell">Total</div>
+              <div class="table-cell">Acciones</div>
+            </div>
+            <div id="salesList" class="table-body">
+              <!-- Las ventas se cargarán aquí dinámicamente -->
+              <div class="empty-state">
+                <div class="empty-icon">📋</div>
+                <p class="empty-message">No hay ventas registradas hoy</p>
+                <p class="empty-submessage">Registra tu primera venta usando el formulario de arriba</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- Firebase compat (CDN) -->
+  <!-- Toast notifications -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Confirmation modal -->
+  <div id="confirmModal" class="modal hidden" role="dialog" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Confirmar acción</h3>
+        <button class="modal-close" aria-label="Cerrar modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="modalMessage">¿Estás seguro de realizar esta acción?</p>
+      </div>
+      <div class="modal-actions">
+        <button id="modalCancel" class="btn btn-outline">Cancelar</button>
+        <button id="modalConfirm" class="btn btn-primary">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-  <!-- Config y offline -->
   <script src="/js/firebase-config.js"></script>
   <script src="/js/auth.js"></script>
   <script src="/js/offline.js"></script>
-    <!-- Nav común -->
   <script src="/js/nav.js"></script>
-
-  <!-- Lógica -->
   <script src="/js/ventas.js"></script>
-
-
 
   <script>
     if ('serviceWorker' in navigator) {
@@ -155,6 +325,16 @@
         if (!reg) navigator.serviceWorker.register('/sw.js').catch(console.error);
       });
     }
+
+    // Animaciones de carga
+    document.addEventListener('DOMContentLoaded', function() {
+      const animatedElements = document.querySelectorAll('.animate-on-load');
+      animatedElements.forEach((el, index) => {
+        setTimeout(() => {
+          el.classList.add('animate-in');
+        }, index * 100);
+      });
+    });
   </script>
 </body>
 </html>
