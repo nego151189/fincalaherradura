@@ -6,185 +6,520 @@
   <title>Tratamientos · Finca La Herradura</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#7CB342" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <!-- Indicador de conectividad -->
-  <div id="connectivityIndicator" class="connectivity-indicator offline" aria-live="polite">
-    <span class="connectivity-dot"></span>
+  <!-- Indicador de conectividad mejorado -->
+  <div id="connectivityIndicator" class="connectivity-indicator offline" aria-live="polite" role="status">
+    <span class="connectivity-dot" aria-hidden="true"></span>
     <span id="connectivityText">Sin Internet</span>
-    <span id="pendingBadge" class="pending-badge hidden">0</span>
+    <span id="pendingBadge" class="pending-badge hidden" aria-label="Tratamientos pendientes">0</span>
   </div>
 
   <main class="page treatments-page">
+    <!-- Header con gradiente mejorado -->
     <header class="page-header">
-      <h1>🧪 Tratamientos fitosanitarios</h1>
-      <p class="subtitle">HLB · Pulgón · Fumagina · producto · dosis · costo</p>
+      <div class="header-content">
+        <div class="header-text">
+          <h1>🧪 Tratamientos Fitosanitarios</h1>
+          <p class="subtitle">Control integral de plagas y enfermedades</p>
+        </div>
+        <div class="header-actions">
+          <button id="syncBtn" class="btn-icon-header" aria-label="Sincronizar datos">
+            <span class="icon">🔄</span>
+          </button>
+        </div>
+      </div>
     </header>
 
-    <!-- KPIs del día -->
-    <section class="stats-section">
-      <div class="stat-card">
-        <div class="stat-number" id="kpiTreatments">0</div>
-        <div class="stat-label">Tratamientos hoy</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="kpiTreesTreated">0</div>
-        <div class="stat-label">Árboles tratados</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="kpiCostTotal">Q0</div>
-        <div class="stat-label">Costo total</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="kpiTopProblem">—</div>
-        <div class="stat-label">Problema top</div>
-      </div>
-    </section>
-
-    <!-- Selección de árboles -->
-    <section class="form-section">
-      <div class="card">
-        <div class="card-header">
-          <h2>🌳 Selecciona árboles (multi-selección)</h2>
+    <!-- KPIs del día con animaciones -->
+    <section class="stats-section" role="region" aria-labelledby="stats-title">
+      <h2 id="stats-title" class="section-title visually-hidden">Estadísticas del día</h2>
+      <div class="stat-card animate-on-load" style="--delay: 0.1s">
+        <div class="stat-icon">💉</div>
+        <div class="stat-content">
+          <div class="stat-number" id="kpiTreatments">0</div>
+          <div class="stat-label">Tratamientos hoy</div>
         </div>
-        <div class="card-body">
-          <div class="row two-col">
-            <div>
-              <label class="label" for="treeSearch">Buscar ARB001…ARB800</label>
-              <input id="treeSearch" class="input" type="search" placeholder="Ej. ARB120 o 120" />
-            </div>
-            <div>
-              <label class="label">Seleccionados</label>
-              <div id="selectedCount" class="pill">0</div>
-            </div>
-          </div>
-
-          <div class="row two-col">
-            <div>
-              <label class="label" for="quickSelect">Selección rápida</label>
-              <input id="quickSelect" class="input" type="text" placeholder="Ej. ARB001, ARB010-ARB020, 35-40" />
-            </div>
-            <div class="row gap">
-              <button id="applyQuickBtn" class="button">✔️ Aplicar</button>
-              <button id="selectAllBtn" class="button">👆 Seleccionar todos</button>
-              <button id="clearSelBtn" class="button">🧹 Limpiar</button>
-            </div>
-          </div>
-
-          <div id="treeGrid" class="tree-grid compact" role="list" aria-label="Árboles"></div>
+      </div>
+      <div class="stat-card animate-on-load" style="--delay: 0.2s">
+        <div class="stat-icon">🌳</div>
+        <div class="stat-content">
+          <div class="stat-number" id="kpiTreesTreated">0</div>
+          <div class="stat-label">Árboles tratados</div>
+        </div>
+      </div>
+      <div class="stat-card animate-on-load" style="--delay: 0.3s">
+        <div class="stat-icon">💰</div>
+        <div class="stat-content">
+          <div class="stat-number" id="kpiCostTotal">Q0</div>
+          <div class="stat-label">Costo total</div>
+        </div>
+      </div>
+      <div class="stat-card animate-on-load" style="--delay: 0.4s">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-content">
+          <div class="stat-number" id="kpiTopProblem">—</div>
+          <div class="stat-label">Problema principal</div>
         </div>
       </div>
     </section>
 
-    <!-- Detalle del tratamiento -->
-    <section class="form-section">
-      <div class="card">
+    <!-- Selección de árboles mejorada -->
+    <section class="form-section animate-on-load" style="--delay: 0.5s" role="region" aria-labelledby="tree-selection-title">
+      <div class="card modern-card">
         <div class="card-header">
-          <h2>🧴 Detalle</h2>
+          <h2 id="tree-selection-title">🌳 Selección de Árboles</h2>
+          <div class="tree-counter">
+            <span id="selectedCount" class="pill pill-ok">0 seleccionados</span>
+          </div>
         </div>
         <div class="card-body">
-          <div class="row two-col">
-            <div>
-              <label class="label" for="problem">Problema</label>
-              <select id="problem" class="select">
-                <option value="hlb">HLB (árbol amarillo)</option>
-                <option value="pulgon">Pulgón</option>
-                <option value="fumagina">Fumagina</option>
-              </select>
-            </div>
-            <div>
-              <label class="label" for="effect">Efectividad (estimada)</label>
-              <select id="effect" class="select">
-                <option value="pendiente">Pendiente</option>
-                <option value="baja">Baja</option>
-                <option value="media">Media</option>
-                <option value="alta">Alta</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="row two-col">
-            <div>
-              <label class="label" for="product">Producto utilizado</label>
-              <input id="product" class="input" type="text" placeholder="Ej. Imidacloprid 200 SL" />
-            </div>
-            <div>
-              <label class="label" for="dose">Dosis</label>
-              <input id="dose" class="input" type="text" placeholder="Ej. 10 ml/L" />
-            </div>
-          </div>
-
-          <div class="row two-col">
-            <div>
-              <label class="label" for="cost">Costo (Q)</label>
-              <input id="cost" class="number-input" type="number" inputmode="decimal" step="0.01" min="0" value="0.00" />
-              <div class="btn-bar">
-                <button class="button mini" data-add="#cost" data-val="25">+25</button>
-                <button class="button mini" data-add="#cost" data-val="50">+50</button>
-                <button class="button mini" data-add="#cost" data-val="-10">-10</button>
+          <!-- Controles de búsqueda y selección -->
+          <div class="tree-controls">
+            <div class="form-group-row">
+              <div class="form-group">
+                <label class="label" for="treeSearch">
+                  <span class="label-icon">🔍</span>
+                  Buscar árboles
+                </label>
+                <div class="input-wrapper">
+                  <input id="treeSearch" 
+                         class="input modern-input" 
+                         type="search" 
+                         placeholder="Ej. ARB120, 120, o 100-150"
+                         autocomplete="off"
+                         aria-describedby="search-help" />
+                  <div class="input-icon">🌲</div>
+                </div>
+                <div id="search-help" class="input-help">
+                  Formatos: ARB001, 120, ARB100-ARB150, 50-75
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="label" for="quickSelect">
+                  <span class="label-icon">⚡</span>
+                  Selección rápida
+                </label>
+                <div class="input-wrapper">
+                  <input id="quickSelect" 
+                         class="input modern-input" 
+                         type="text" 
+                         placeholder="Ej. ARB001, ARB010-ARB020, 35-40"
+                         autocomplete="off"
+                         aria-describedby="quick-help" />
+                  <div class="input-icon">📝</div>
+                </div>
+                <div id="quick-help" class="input-help">
+                  Separar múltiples selecciones con comas
+                </div>
               </div>
             </div>
-            <div>
-              <label class="label" for="timeInput">Fecha y hora</label>
-              <div class="row two-col slim">
-                <input id="dateInput" class="input" type="date" />
-                <input id="timeInput" class="input" type="time" />
-              </div>
+
+            <!-- Botones de acción rápida -->
+            <div class="quick-actions-row">
+              <button id="applyQuickBtn" class="btn btn-primary">
+                <span class="btn-icon">✅</span>
+                Aplicar
+              </button>
+              <button id="selectAllBtn" class="btn btn-secondary">
+                <span class="btn-icon">👆</span>
+                Todos
+              </button>
+              <button id="clearSelBtn" class="btn btn-outline">
+                <span class="btn-icon">🧹</span>
+                Limpiar
+              </button>
+              <button id="filterByStateBtn" class="btn btn-outline dropdown-toggle" aria-expanded="false">
+                <span class="btn-icon">🎛️</span>
+                Filtros
+                <span class="dropdown-arrow">▼</span>
+              </button>
+            </div>
+
+            <!-- Dropdown de filtros -->
+            <div id="filterDropdown" class="dropdown-menu hidden">
+              <div class="dropdown-header">Filtrar por estado:</div>
+              <button class="dropdown-item" data-filter="sano">
+                <span class="status-dot sano"></span>
+                Solo árboles sanos
+              </button>
+              <button class="dropdown-item" data-filter="hlb">
+                <span class="status-dot hlb"></span>
+                Con HLB
+              </button>
+              <button class="dropdown-item" data-filter="pulgon">
+                <span class="status-dot pulgon"></span>
+                Con pulgón
+              </button>
+              <button class="dropdown-item" data-filter="fumagina">
+                <span class="status-dot fumagina"></span>
+                Con fumagina
+              </button>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item" data-filter="all">
+                <span class="status-dot all"></span>
+                Mostrar todos
+              </button>
             </div>
           </div>
 
-          <div class="row">
-            <label class="label" for="notes">Observaciones</label>
-            <textarea id="notes" class="input" rows="2" placeholder="Ej. Aplicación temprano, sin viento"></textarea>
-          </div>
-
-          <div class="row row-actions">
-            <button id="saveTreatmentBtn" class="button primary">💾 Guardar tratamiento</button>
-            <button id="syncBtn" class="button">🔄 Sincronizar</button>
-            <button id="clearFormBtn" class="button">🧹 Limpiar</button>
+          <!-- Grid de árboles mejorado -->
+          <div class="tree-selection-area">
+            <div class="tree-grid-header">
+              <span class="grid-title">Árboles disponibles (ARB001 - ARB800)</span>
+              <div class="grid-legend">
+                <div class="legend-item">
+                  <span class="legend-dot sano"></span>
+                  <span class="legend-text">Sano</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot hlb"></span>
+                  <span class="legend-text">HLB</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot pulgon"></span>
+                  <span class="legend-text">Pulgón</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot fumagina"></span>
+                  <span class="legend-text">Fumagina</span>
+                </div>
+              </div>
+            </div>
+            
+            <div id="treeGrid" 
+                 class="tree-grid compact" 
+                 role="grid" 
+                 aria-label="Selección de árboles"
+                 aria-multiselectable="true">
+              <!-- Los árboles se cargarán dinámicamente aquí -->
+            </div>
+            
+            <div id="treeGridLoading" class="tree-grid-loading hidden">
+              <div class="loading-spinner"></div>
+              <p>Cargando árboles...</p>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Lista de hoy -->
-    <section class="list-section">
-      <div class="card">
+    <!-- Detalle del tratamiento mejorado -->
+    <section class="form-section animate-on-load" style="--delay: 0.6s" role="region" aria-labelledby="treatment-form-title">
+      <div class="card modern-card">
         <div class="card-header">
-          <h2>📜 Tratamientos de hoy</h2>
+          <h2 id="treatment-form-title">🧴 Detalle del Tratamiento</h2>
+          <div class="form-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 0%"></div>
+            </div>
+            <span class="progress-text">0% completado</span>
+          </div>
         </div>
         <div class="card-body">
-          <div class="list list-header">
-            <div class="list-cell">Hora</div>
-            <div class="list-cell">Problema</div>
-            <div class="list-cell">Producto</div>
-            <div class="list-cell">Árboles</div>
-            <div class="list-cell right">Costo</div>
-            <div class="list-cell">Efect.</div>
+          <form id="treatmentForm" novalidate>
+            <!-- Problema y efectividad -->
+            <div class="form-group-row">
+              <div class="form-group">
+                <label class="label required" for="problem">
+                  <span class="label-icon">🐛</span>
+                  Problema a tratar
+                </label>
+                <div class="select-wrapper">
+                  <select id="problem" class="select modern-select" required aria-describedby="problem-error">
+                    <option value="">Seleccionar problema...</option>
+                    <option value="hlb">🟡 HLB (Huanglongbing)</option>
+                    <option value="pulgon">🟠 Pulgón</option>
+                    <option value="fumagina">🔴 Fumagina</option>
+                    <option value="otro">🔧 Otro</option>
+                  </select>
+                  <div class="select-icon">⬇️</div>
+                </div>
+                <div id="problem-error" class="error-message hidden" role="alert"></div>
+                <div class="problem-description" id="problemDescription"></div>
+              </div>
+              
+              <div class="form-group">
+                <label class="label" for="effect">
+                  <span class="label-icon">📊</span>
+                  Efectividad esperada
+                </label>
+                <div class="select-wrapper">
+                  <select id="effect" class="select modern-select" aria-describedby="effect-help">
+                    <option value="pendiente">⏳ Pendiente</option>
+                    <option value="baja">🔴 Baja (20-40%)</option>
+                    <option value="media">🟡 Media (40-70%)</option>
+                    <option value="alta">🟢 Alta (70-95%)</option>
+                  </select>
+                  <div class="select-icon">⬇️</div>
+                </div>
+                <div id="effect-help" class="input-help">
+                  Se puede actualizar después del tratamiento
+                </div>
+              </div>
+            </div>
+
+            <!-- Producto y dosis -->
+            <div class="form-group-row">
+              <div class="form-group">
+                <label class="label required" for="product">
+                  <span class="label-icon">🧪</span>
+                  Producto utilizado
+                </label>
+                <div class="input-wrapper">
+                  <input id="product" 
+                         class="input modern-input" 
+                         type="text" 
+                         placeholder="Ej. Imidacloprid 200 SL"
+                         required
+                         list="productSuggestions"
+                         autocomplete="off"
+                         aria-describedby="product-error" />
+                  <div class="input-icon">💊</div>
+                </div>
+                <datalist id="productSuggestions">
+                  <option value="Imidacloprid 200 SL">
+                  <option value="Aceite mineral">
+                  <option value="Jabón potásico">
+                  <option value="Sulfato de cobre">
+                  <option value="Bicarbonato de sodio">
+                </datalist>
+                <div id="product-error" class="error-message hidden" role="alert"></div>
+              </div>
+              
+              <div class="form-group">
+                <label class="label required" for="dose">
+                  <span class="label-icon">⚗️</span>
+                  Dosis aplicada
+                </label>
+                <div class="input-wrapper">
+                  <input id="dose" 
+                         class="input modern-input" 
+                         type="text" 
+                         placeholder="Ej. 10 ml/L, 2%"
+                         required
+                         autocomplete="off"
+                         aria-describedby="dose-error dose-help" />
+                  <div class="input-icon">📏</div>
+                </div>
+                <div id="dose-help" class="input-help">
+                  Incluir unidades: ml/L, g/L, %
+                </div>
+                <div id="dose-error" class="error-message hidden" role="alert"></div>
+              </div>
+            </div>
+
+            <!-- Costo y fecha/hora -->
+            <div class="form-group-row">
+              <div class="form-group">
+                <label class="label" for="cost">
+                  <span class="label-icon">💰</span>
+                  Costo del tratamiento
+                </label>
+                <div class="number-input-wrapper">
+                  <div class="currency-symbol">Q</div>
+                  <input id="cost" 
+                         class="number-input modern-input" 
+                         type="number" 
+                         inputmode="decimal" 
+                         step="0.01" 
+                         min="0" 
+                         value="0.00"
+                         aria-describedby="cost-help" />
+                  <div class="input-controls">
+                    <button type="button" class="btn-stepper" data-action="increment" data-target="cost" aria-label="Incrementar costo">+</button>
+                    <button type="button" class="btn-stepper" data-action="decrement" data-target="cost" aria-label="Decrementar costo">-</button>
+                  </div>
+                </div>
+                <div class="quick-amounts">
+                  <button type="button" class="btn-quick" data-add="#cost" data-val="25">+Q25</button>
+                  <button type="button" class="btn-quick" data-add="#cost" data-val="50">+Q50</button>
+                  <button type="button" class="btn-quick" data-add="#cost" data-val="100">+Q100</button>
+                  <button type="button" class="btn-quick" data-add="#cost" data-val="-10">-Q10</button>
+                </div>
+                <div id="cost-help" class="input-help">
+                  Incluye producto, mano de obra y equipos
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="label" for="dateInput">
+                  <span class="label-icon">📅</span>
+                  Fecha y hora
+                </label>
+                <div class="datetime-wrapper">
+                  <div class="datetime-inputs">
+                    <input id="dateInput" 
+                           class="input modern-input datetime-input" 
+                           type="date" 
+                           aria-label="Fecha del tratamiento" />
+                    <input id="timeInput" 
+                           class="input modern-input datetime-input" 
+                           type="time" 
+                           aria-label="Hora del tratamiento" />
+                  </div>
+                  <button type="button" id="setNowBtn" class="btn-quick">
+                    <span class="btn-icon">🕐</span>
+                    Ahora
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Observaciones -->
+            <div class="form-group">
+              <label class="label" for="notes">
+                <span class="label-icon">📝</span>
+                Observaciones del tratamiento
+                <span class="label-optional">(opcional)</span>
+              </label>
+              <div class="textarea-wrapper">
+                <textarea id="notes" 
+                          class="textarea modern-input" 
+                          rows="3" 
+                          placeholder="Ej. Aplicación temprano, sin viento, condiciones ideales..."
+                          maxlength="300"
+                          aria-describedby="notes-counter"></textarea>
+                <div id="notes-counter" class="character-counter">0/300</div>
+              </div>
+            </div>
+
+            <!-- Resumen del tratamiento -->
+            <div id="treatmentSummary" class="treatment-summary hidden">
+              <h3 class="summary-title">📋 Resumen del Tratamiento</h3>
+              <div class="summary-grid">
+                <div class="summary-item">
+                  <span class="summary-label">Árboles:</span>
+                  <span id="summaryTrees" class="summary-value">0 seleccionados</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Problema:</span>
+                  <span id="summaryProblem" class="summary-value">-</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Producto:</span>
+                  <span id="summaryProduct" class="summary-value">-</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Costo total:</span>
+                  <span id="summaryCost" class="summary-value">Q0.00</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="form-actions">
+              <button type="submit" id="saveTreatmentBtn" class="btn btn-primary btn-large">
+                <span class="btn-icon">💾</span>
+                <span class="btn-text">Guardar Tratamiento</span>
+                <div class="btn-loading hidden">
+                  <div class="spinner"></div>
+                </div>
+              </button>
+              
+              <div class="secondary-actions">
+                <button type="button" id="clearFormBtn" class="btn btn-outline">
+                  <span class="btn-icon">🧹</span>
+                  Limpiar Formulario
+                </button>
+                <button type="button" id="saveDraftBtn" class="btn btn-secondary">
+                  <span class="btn-icon">📄</span>
+                  Guardar Borrador
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lista de tratamientos de hoy mejorada -->
+    <section class="list-section animate-on-load" style="--delay: 0.7s" role="region" aria-labelledby="treatments-list-title">
+      <div class="card modern-card">
+        <div class="card-header">
+          <h2 id="treatments-list-title">📜 Tratamientos de Hoy</h2>
+          <div class="list-controls">
+            <button id="filterListBtn" class="btn-icon-small" aria-label="Filtrar lista">
+              <span class="icon">🔍</span>
+            </button>
+            <button id="exportListBtn" class="btn-icon-small" aria-label="Exportar lista">
+              <span class="icon">📤</span>
+            </button>
           </div>
-          <div id="treatList" class="list"></div>
+        </div>
+        <div class="card-body">
+          <!-- Resumen del día -->
+          <div class="treatments-summary">
+            <div class="summary-item">
+              <span class="summary-label">Total de tratamientos:</span>
+              <span id="dailyTreatments" class="summary-value">0</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Costo total del día:</span>
+              <span id="dailyCost" class="summary-value">Q0.00</span>
+            </div>
+          </div>
+          
+          <!-- Tabla responsive -->
+          <div class="table-responsive">
+            <div class="table-header">
+              <div class="table-cell">Hora</div>
+              <div class="table-cell">Problema</div>
+              <div class="table-cell">Producto</div>
+              <div class="table-cell">Árboles</div>
+              <div class="table-cell">Costo</div>
+              <div class="table-cell">Efectividad</div>
+              <div class="table-cell">Acciones</div>
+            </div>
+            <div id="treatList" class="table-body">
+              <!-- Los tratamientos se cargarán aquí dinámicamente -->
+              <div class="empty-state">
+                <div class="empty-icon">🧪</div>
+                <p class="empty-message">No hay tratamientos registrados hoy</p>
+                <p class="empty-submessage">Los tratamientos que registres aparecerán aquí</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- Firebase compat (CDN) -->
+  <!-- Toast notifications -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Modal de confirmación -->
+  <div id="confirmModal" class="modal hidden" role="dialog" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Confirmar acción</h3>
+        <button class="modal-close" aria-label="Cerrar modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="modalMessage">¿Estás seguro de realizar esta acción?</p>
+      </div>
+      <div class="modal-actions">
+        <button id="modalCancel" class="btn btn-outline">Cancelar</button>
+        <button id="modalConfirm" class="btn btn-primary">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-  <!-- Config y offline -->
   <script src="js/firebase-config.js"></script>
-    <script src="js/auth.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/offline.js"></script>
-
-    <!-- Nav común -->
   <script src="js/nav.js"></script>
-
-  <!-- Lógica -->
   <script src="js/tratamientos.js"></script>
-
-
 
   <script>
     if ('serviceWorker' in navigator) {
@@ -192,6 +527,32 @@
         if (!reg) navigator.serviceWorker.register('/sw.js').catch(console.error);
       });
     }
+
+    // Inicialización de componentes
+    document.addEventListener('DOMContentLoaded', function() {
+      // Animaciones de carga
+      const animatedElements = document.querySelectorAll('.animate-on-load');
+      animatedElements.forEach((el, index) => {
+        setTimeout(() => {
+          el.classList.add('animate-in');
+        }, index * 100);
+      });
+
+      // Configurar fecha y hora actual por defecto
+      const now = new Date();
+      const dateInput = document.getElementById('dateInput');
+      const timeInput = document.getElementById('timeInput');
+      
+      dateInput.value = now.toISOString().split('T')[0];
+      timeInput.value = now.toTimeString().slice(0, 5);
+
+      // Botón "Ahora"
+      document.getElementById('setNowBtn').addEventListener('click', function() {
+        const now = new Date();
+        dateInput.value = now.toISOString().split('T')[0];
+        timeInput.value = now.toTimeString().slice(0, 5);
+      });
+    });
   </script>
 </body>
 </html>
