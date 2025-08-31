@@ -1,37 +1,20 @@
-// sw.js — Versión corregida
-const CACHE = "finca-herradura-v24";
+// sw.js - Versión mejorada
+const CACHE = "finca-herradura-v25";
 const APP_SHELL = [
-  "/",
-  "index.html",
-  "css/style.css",
-  "manifest.json",
-  "js/firebase-config.js",
-  "js/auth.js",
-  "js/offline.js",
-  "icons/icon-192x192.png",
-  "icons/icon-512x512.png"
+  "./",
+  "./index.html",
+  "./css/style.css",
+  "./manifest.json",
+  "./js/firebase-config.js",
+  "./js/auth.js", 
+  "./js/offline.js"
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE).then((cache) => {
-      // Cachear solo los archivos esenciales que existen
-      return Promise.all(
-        APP_SHELL.map(url => {
-          return fetch(url)
-            .then(response => {
-              if (response.ok) {
-                return cache.put(url, response);
-              }
-              console.log('No se pudo cachear:', url);
-              return Promise.resolve();
-            })
-            .catch(error => {
-              console.log('Error cacheando:', url, error);
-              return Promise.resolve();
-            });
-        })
-      );
+      console.log('Service Worker instalado');
+      return Promise.resolve(); // No forzar cacheo inicial
     })
   );
   self.skipWaiting();
@@ -47,19 +30,31 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  const req = event.request;
-  if (req.method !== "GET") return;
+  // Solo manejar solicitudes GET
+  if (event.request.method !== 'GET') return;
   
   event.respondWith(
-    caches.match(req).then((cached) => {
-      const fetchPromise = fetch(req)
-        .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
-          return res;
+    caches.match(event.request).then((cached) => {
+      // Intentar network primero, fallar a cache
+      return fetch(event.request)
+        .then((response) => {
+          // Cachear respuesta exitosa
+          if (response.ok) {
+            const responseClone = response.clone();
+            caches.open(CACHE).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
+          }
+          return response;
         })
-        .catch(() => cached || new Response('Offline', { status: 503, statusText: 'Offline' }));
-      return cached || fetchPromise;
+        .catch(() => {
+          // Fallback a cache si está disponible
+          return cached || new Response('Offline', { 
+            status: 503, 
+            statusText: 'Offline',
+            headers: new Headers({ 'Content-Type': 'text/plain' })
+          });
+        });
     })
   );
 });
