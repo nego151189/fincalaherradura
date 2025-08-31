@@ -7,27 +7,37 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // Permitir autenticación anónima (para desarrollo/testing)
+    function isAnonymous() {
+      return isAuthed() && request.auth.token.firebase.sign_in_provider == 'anonymous';
+    }
+
     // Doc con configuración app: /settings/app  { ownerUid: "<UID>" }
     function ownerUid() {
       return get(/databases/$(database)/documents/settings/app).data.ownerUid;
     }
 
     function isOwner() {
-      return isAuthed() && request.auth.uid == ownerUid()
-        || (exists(/databases/$(database)/documents/users/$(request.auth.uid))
-            && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "owner");
+      return isAuthed() && (request.auth.uid == ownerUid() || 
+             (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "owner"));
     }
 
     function isWorker() {
-      return isAuthed()
-        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "worker";
+      return isAuthed() && 
+             (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "worker");
     }
 
     function isViewer() {
-      return isAuthed()
-        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "viewer";
+      return isAuthed() && 
+             (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "viewer");
+    }
+
+    // Usuario básico (autenticado pero sin rol específico)
+    function isBasicUser() {
+      return isAuthed() && !isOwner() && !isWorker() && !isViewer();
     }
 
     // Cambios permitidos exactamente sobre un conjunto de claves
@@ -37,20 +47,31 @@ service cloud.firestore {
 
     // Validaciones básicas
     function nonNeg(n) { return n is int || n is float && n >= 0; }
-    function inEnum(v, arr) { return arr.hasAll([v]); }
+    function inEnum(v, arr) { return v in arr; }
     function str(s) { return s is string && s.size() <= 200; }
     function strLong(s) { return s is string && s.size() <= 2000; }
     function isTodayOrNear(tsDays) {
       // Fecha dentro de +/- 3 días del request.time
-      return request.resource.data.fecha is timestamp
-        && (request.resource.data.fecha > (request.time - duration.value(tsDays, "d")))
-        && (request.resource.data.fecha < (request.time + duration.value(tsDays, "d")));
+      return request.resource.data.fecha is timestamp &&
+             request.resource.data.fecha >= (request.time - duration.value(tsDays, 'd')) &&
+             request.resource.data.fecha <= (request.time + duration.value(tsDays, 'd'));
+    }
+
+    // ========= PERMISOS BÁSICOS PARA DESARROLLO =========
+    // Permisos de lectura básicos para usuarios autenticados
+    function canReadBasicData() {
+      return isAuthed() || isAnonymous();
+    }
+
+    // Permisos de escritura básicos para desarrollo
+    function canWriteBasicData() {
+      return isAuthed() || isAnonymous();
     }
 
     // ========= SETTINGS / USERS =========
     // /settings/app solo owner
     match /settings/app {
-      allow read: if isAuthed();
+      allow read: if isOwner() || isWorker() || isViewer();
       allow write: if isOwner();
     }
 
@@ -58,116 +79,117 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if isOwner() || (isAuthed() && request.auth.uid == uid);
       // Crear propio doc: solo con role "worker" y sin poder auto-ascender
-      allow create: if isAuthed()
-        && request.auth.uid == uid
-        && request.resource.data.role == "worker";
+      allow create: if isAuthed() && request.auth.uid == uid && 
+                     request.resource.data.role in ["worker", "viewer"];
       // Owner puede crear/editar cualquiera y cambiar roles
       allow update, delete: if isOwner();
       // Usuario puede editar su doc solo si NO cambia el role
-      allow update: if isAuthed() && request.auth.uid == uid
-        && request.resource.data.role == resource.data.role;
+      allow update: if isAuthed() && request.auth.uid == uid &&
+                     request.resource.data.role == resource.data.role;
     }
 
     // ========= FINCA (doc maestro opcional) =========
     match /finca_la_herradura/{docId} {
-      allow read: if isAuthed();
+      allow read: if canReadBasicData();
       allow write: if isOwner();
     }
 
     // ========= ARBOLES =========
-    // Master data de árboles. Workers solo pueden marcar "ultimo_riego" y "ultima_inspeccion".
     match /arboles/{arbolId} {
-      allow read: if isAuthed();
+      allow read: if canReadBasicData();
       allow create, delete: if isOwner();
-      allow update: if isOwner()
-        || (isWorker() && onlyChanges(["ultimo_riego", "ultima_inspeccion"]));
+      allow update: if isOwner() || 
+                     (isWorker() && onlyChanges(["ultimo_riego", "ultima_inspeccion"])) ||
+                     (canWriteBasicData() && request.time < timestamp.date(2025, 1, 1)); // Temporal para desarrollo
     }
 
     // ========= PRODUCCIÓN DIARIA =========
     match /cosechas_diarias/{docId} {
-      allow read: if isAuthed();
-      allow create: if isOwner() || isWorker()
-        && request.resource.data.arbol_id is string
-        && nonNeg(request.resource.data.unidades_primera)
-        && nonNeg(request.resource.data.unidades_segunda)
-        && nonNeg(request.resource.data.unidades_descarte)
-        && isTodayOrNear(3);
-      // No se editan registros pasados desde cliente
+      allow read: if canReadBasicData();
+      allow create: if isOwner() || isWorker() || 
+                     (canWriteBasicData() && 
+                      request.resource.data.arbol_id is string &&
+                      nonNeg(request.resource.data.unidades_primera) &&
+                      nonNeg(request.resource.data.unidades_segunda) &&
+                      nonNeg(request.resource.data.unidades_descarte) &&
+                      isTodayOrNear(3));
       allow update, delete: if isOwner();
     }
 
     // ========= RIEGOS =========
     match /riegos/{docId} {
-      allow read: if isAuthed();
-      allow create: if isOwner() || isWorker()
-        && request.resource.data.arboles_regados is list
-        && request.resource.data.arboles_regados.size() <= 200
-        && nonNeg(request.resource.data.litros_utilizados)
-        && isTodayOrNear(3);
+      allow read: if canReadBasicData();
+      allow create: if isOwner() || isWorker() || 
+                     (canWriteBasicData() && 
+                      request.resource.data.arboles_regados is list &&
+                      request.resource.data.arboles_regados.size() <= 200 &&
+                      nonNeg(request.resource.data.litros_utilizados) &&
+                      isTodayOrNear(3));
       allow update, delete: if isOwner();
     }
 
-    // ========= ACTIVIDADES DIARIAS (genéricas) =========
+    // ========= ACTIVIDADES DIARIAS =========
     match /actividades_diarias/{docId} {
-      allow read: if isAuthed();
-      allow create: if isOwner() || isWorker()
-        && inEnum(request.resource.data.tipo, ["riego","abono","poda","fumigacion","cosecha"])
-        && isTodayOrNear(5);
+      allow read: if canReadBasicData();
+      allow create: if isOwner() || isWorker() || 
+                     (canWriteBasicData() && 
+                      request.resource.data.tipo in ["riego","abono","poda","fumigacion","cosecha"] &&
+                      isTodayOrNear(5));
       allow update, delete: if isOwner();
     }
 
     // ========= TRATAMIENTOS FITOSANITARIOS =========
     match /tratamientos_fitosanitarios/{docId} {
-      allow read: if isAuthed();
-      allow create: if (isOwner() || isWorker())
-        && inEnum(request.resource.data.problema, ["hlb","pulgon","fumagina"])
-        && inEnum(request.resource.data.efectividad, ["pendiente","baja","media","alta"])
-        && request.resource.data.arboles_tratados is list
-        && request.resource.data.arboles_tratados.size() <= 200
-        && str(request.resource.data.producto_utilizado)
-        && str(request.resource.data.dosis)
-        && nonNeg(request.resource.data.costo_tratamiento)
-        && isTodayOrNear(5);
-      // Permitir actualizar solo "efectividad" y "observaciones" después
-      allow update: if (isOwner() || isWorker())
-        && onlyChanges(["efectividad","observaciones"]);
+      allow read: if canReadBasicData();
+      allow create: if isOwner() || isWorker() || 
+                     (canWriteBasicData() && 
+                      request.resource.data.problema in ["hlb","pulgon","fumagina"] &&
+                      request.resource.data.efectividad in ["pendiente","baja","media","alta"] &&
+                      request.resource.data.arboles_tratados is list &&
+                      request.resource.data.arboles_tratados.size() <= 200 &&
+                      str(request.resource.data.producto_utilizado) &&
+                      str(request.resource.data.dosis) &&
+                      nonNeg(request.resource.data.costo_tratamiento) &&
+                      isTodayOrNear(5));
+      allow update: if isOwner() || isWorker() || 
+                     (canWriteBasicData() && onlyChanges(["efectividad","observaciones"]));
       allow delete: if isOwner();
     }
 
     // ========= RECORDATORIOS =========
     match /recordatorios_asistente/{docId} {
-      allow read: if isAuthed();
-      // Crear por owner/worker
-      allow create: if (isOwner() || isWorker())
-        && inEnum(request.resource.data.tipo, ["riego","abono","fumigacion","cosecha"])
-        && request.resource.data.fecha_programada is timestamp
-        && request.resource.data.arboles_objetivo is list
-        && request.resource.data.arboles_objetivo.size() <= 500
-        && str(request.resource.data.mensaje)
-        && inEnum(request.resource.data.repeticion, ["none","weekly","biweekly","monthly"]);
-      // Completar o posponer: solo cambian campos acotados
-      allow update: if (isOwner() || isWorker())
-        && request.resource.data.diff(resource.data).changedKeys()
-             .hasOnly(["completado","fecha_completado","fecha_programada"]);
+      allow read: if canReadBasicData();
+      allow create: if isOwner() || isWorker() || 
+                     (canWriteBasicData() && 
+                      request.resource.data.tipo in ["riego","abono","fumigacion","cosecha"] &&
+                      request.resource.data.fecha_programada is timestamp &&
+                      request.resource.data.arboles_objetivo is list &&
+                      request.resource.data.arboles_objetivo.size() <= 500 &&
+                      str(request.resource.data.mensaje) &&
+                      request.resource.data.repeticion in ["none","weekly","biweekly","monthly"]);
+      allow update: if isOwner() || isWorker() || 
+                     (canWriteBasicData() && onlyChanges(["completado","fecha_completado","fecha_programada"]));
       allow delete: if isOwner();
     }
 
     // ========= VENTAS Y GASTOS =========
     match /ventas_directas/{docId} {
-      allow read: if isAuthed();
-      allow create, update, delete: if isOwner(); // ventas: solo owner
+      allow read: if canReadBasicData();
+      allow create, update, delete: if isOwner() || 
+                                     (canWriteBasicData() && request.time < timestamp.date(2025, 1, 1));
     }
 
     match /gastos/{docId} {
-      allow read: if isOwner() || isViewer(); // viewer puede ver contabilidad
-      allow create, update, delete: if isOwner();
+      allow read: if isOwner() || isViewer() || canReadBasicData();
+      allow create, update, delete: if isOwner() || 
+                                     (canWriteBasicData() && request.time < timestamp.date(2025, 1, 1));
     }
 
     // ========= PRECIOS MAGA =========
-    // Se llena por Cloud Function (admin SDK bypassa reglas). Owner puede corregir manual.
     match /precios_maga/{docId} {
-      allow read: if isAuthed();
-      allow write: if isOwner();
+      allow read: if canReadBasicData();
+      allow write: if isOwner() || 
+                     (canWriteBasicData() && request.time < timestamp.date(2025, 1, 1));
     }
 
     // ========= FALLBACK =========
