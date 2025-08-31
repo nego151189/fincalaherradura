@@ -6,140 +6,592 @@
   <title>Gastos · Finca La Herradura</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#7CB342" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <!-- Indicador de conectividad -->
-  <div id="connectivityIndicator" class="connectivity-indicator offline" aria-live="polite">
-    <span class="connectivity-dot"></span>
+  <!-- Indicador de conectividad mejorado -->
+  <div id="connectivityIndicator" class="connectivity-indicator offline" aria-live="polite" role="status">
+    <span class="connectivity-dot" aria-hidden="true"></span>
     <span id="connectivityText">Sin Internet</span>
-    <span id="pendingBadge" class="pending-badge hidden">0</span>
+    <span id="pendingBadge" class="pending-badge hidden" aria-label="Gastos pendientes">0</span>
   </div>
 
   <main class="page expenses-page">
+    <!-- Header con gradiente mejorado -->
     <header class="page-header">
-      <h1>💸 Gastos</h1>
-      <p class="subtitle">Categoría · descripción · monto · proveedor</p>
+      <div class="header-content">
+        <div class="header-text">
+          <h1>💸 Control de Gastos</h1>
+          <p class="subtitle">Gestión financiera integral de la finca</p>
+        </div>
+        <div class="header-actions">
+          <button id="syncBtn" class="btn-icon-header" aria-label="Sincronizar datos">
+            <span class="icon">🔄</span>
+          </button>
+          <button id="budgetBtn" class="btn-icon-header" aria-label="Ver presupuesto">
+            <span class="icon">📊</span>
+          </button>
+        </div>
+      </div>
     </header>
 
-    <!-- KPIs del día -->
-    <section class="stats-section">
-      <div class="stat-card">
-        <div class="stat-number" id="kpiExpCount">0</div>
-        <div class="stat-label">Gastos hoy</div>
+    <!-- KPIs financieros mejorados -->
+    <section class="stats-section" role="region" aria-labelledby="financial-stats-title">
+      <h2 id="financial-stats-title" class="section-title visually-hidden">Estadísticas financieras</h2>
+      
+      <div class="stat-card expense-count animate-on-load" style="--delay: 0.1s">
+        <div class="stat-icon">📝</div>
+        <div class="stat-content">
+          <div class="stat-number" id="kpiExpCount">0</div>
+          <div class="stat-label">Gastos hoy</div>
+          <div class="stat-trend" id="expCountTrend">+0 vs ayer</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-number" id="kpiExpTotal">Q0</div>
-        <div class="stat-label">Total de hoy</div>
+      
+      <div class="stat-card daily-total animate-on-load" style="--delay: 0.2s">
+        <div class="stat-icon">💰</div>
+        <div class="stat-content">
+          <div class="stat-number" id="kpiExpTotal">Q0</div>
+          <div class="stat-label">Total de hoy</div>
+          <div class="stat-progress">
+            <div class="budget-bar">
+              <div class="budget-fill" id="budgetFill" style="width: 0%"></div>
+            </div>
+            <span class="budget-text" id="budgetText">0% del presupuesto</span>
+          </div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-number" id="kpiExpAvg">Q0.00</div>
-        <div class="stat-label">Promedio</div>
+      
+      <div class="stat-card average-expense animate-on-load" style="--delay: 0.3s">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+          <div class="stat-number" id="kpiExpAvg">Q0.00</div>
+          <div class="stat-label">Promedio/gasto</div>
+          <div class="stat-meta" id="avgComparison">= vs histórico</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-number" id="kpiTopCat">—</div>
-        <div class="stat-label">Categoría top</div>
+      
+      <div class="stat-card top-category animate-on-load" style="--delay: 0.4s">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-content">
+          <div class="stat-number" id="kpiTopCat">—</div>
+          <div class="stat-label">Categoría principal</div>
+          <div class="stat-meta" id="topCatPercent">—% del total</div>
+        </div>
+      </div>
+      
+      <div class="stat-card monthly-total animate-on-load" style="--delay: 0.5s">
+        <div class="stat-icon">📅</div>
+        <div class="stat-content">
+          <div class="stat-number" id="kpiMonthTotal">Q0</div>
+          <div class="stat-label">Total del mes</div>
+          <div class="stat-meta" id="monthlyProjection">Proyección: Q0</div>
+        </div>
       </div>
     </section>
 
-    <!-- Registro de gasto -->
-    <section class="form-section">
-      <div class="card">
+    <!-- Panel de análisis rápido -->
+    <section class="analysis-panel animate-on-load" style="--delay: 0.6s">
+      <div class="card modern-card">
         <div class="card-header">
-          <h2>🧾 Registrar gasto</h2>
+          <h2>📈 Análisis Financiero</h2>
+          <div class="analysis-period">
+            <button id="periodToday" class="period-btn active">Hoy</button>
+            <button id="periodWeek" class="period-btn">Semana</button>
+            <button id="periodMonth" class="period-btn">Mes</button>
+          </div>
         </div>
         <div class="card-body">
-          <div class="row two-col">
-            <div>
-              <label class="label" for="category">Categoría</label>
-              <select id="category" class="select">
-                <option value="fertilizantes">Fertilizantes</option>
-                <option value="pesticidas">Pesticidas</option>
-                <option value="combustible">Combustible</option>
-                <option value="salarios">Salarios</option>
-                <option value="mantenimiento">Mantenimiento</option>
-                <option value="transporte">Transporte</option>
-                <option value="otros">Otros</option>
-              </select>
-            </div>
-            <div>
-              <label class="label" for="provider">Proveedor</label>
-              <input id="provider" class="input" type="text" placeholder="Ej. AgroSur" />
-            </div>
-          </div>
-
-          <div class="row">
-            <label class="label" for="description">Descripción</label>
-            <input id="description" class="input" type="text" placeholder="Ej. Urea 46% saco 50kg" />
-          </div>
-
-          <div class="row two-col">
-            <div>
-              <label class="label" for="amount">Monto (Q)</label>
-              <input id="amount" class="number-input" type="number" inputmode="decimal" step="0.01" min="0.01" value="100.00" />
-              <div class="btn-bar">
-                <button class="button mini" data-add="#amount" data-val="50">+50</button>
-                <button class="button mini" data-add="#amount" data-val="100">+100</button>
-                <button class="button mini" data-add="#amount" data-val="-10">-10</button>
+          <div class="expense-breakdown">
+            <div class="breakdown-chart">
+              <div class="chart-container">
+                <canvas id="expenseChart" width="200" height="200"></canvas>
+                <div class="chart-center">
+                  <div class="chart-total" id="chartTotal">Q0</div>
+                  <div class="chart-label">Total</div>
+                </div>
               </div>
             </div>
-            <div>
-              <label class="label" for="dateInput">Fecha</label>
-              <input id="dateInput" class="input" type="date" />
+            <div class="breakdown-legend" id="expenseLegend">
+              <!-- Leyenda se genera dinámicamente -->
             </div>
           </div>
-
-          <div class="row row-actions">
-            <button id="saveExpenseBtn" class="button primary">💾 Guardar gasto</button>
-            <button id="syncBtn" class="button">🔄 Sincronizar</button>
-            <button id="clearBtn" class="button">🧹 Limpiar</button>
+          
+          <div class="financial-alerts" id="financialAlerts">
+            <!-- Alertas se generan dinámicamente -->
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Lista de hoy -->
-    <section class="list-section">
-      <div class="card">
+    <!-- Registro de gasto mejorado -->
+    <section class="form-section animate-on-load" style="--delay: 0.7s" role="region" aria-labelledby="expense-form-title">
+      <div class="card modern-card">
         <div class="card-header">
-          <h2>📜 Gastos de hoy</h2>
+          <h2 id="expense-form-title">🧾 Registrar Gasto</h2>
+          <div class="form-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 0%"></div>
+            </div>
+            <span class="progress-text">0% completado</span>
+          </div>
         </div>
         <div class="card-body">
-          <div class="list list-header">
-            <div class="list-cell">Hora</div>
-            <div class="list-cell">Categoría</div>
-            <div class="list-cell">Proveedor</div>
-            <div class="list-cell">Descripción</div>
-            <div class="list-cell right">Monto</div>
+          <form id="expenseForm" novalidate>
+            <!-- Categoría y Proveedor -->
+            <div class="form-group-row">
+              <div class="form-group">
+                <label class="label required" for="category">
+                  <span class="label-icon">🏷️</span>
+                  Categoría del gasto
+                </label>
+                <div class="select-wrapper">
+                  <select id="category" class="select modern-select" required aria-describedby="category-error">
+                    <option value="">Seleccionar categoría...</option>
+                    <option value="fertilizantes">🌱 Fertilizantes</option>
+                    <option value="pesticidas">🧪 Pesticidas</option>
+                    <option value="combustible">⛽ Combustible</option>
+                    <option value="salarios">👥 Salarios</option>
+                    <option value="mantenimiento">🔧 Mantenimiento</option>
+                    <option value="transporte">🚚 Transporte</option>
+                    <option value="agua">💧 Agua/Servicios</option>
+                    <option value="semillas">🌰 Semillas/Plantas</option>
+                    <option value="herramientas">🛠️ Herramientas</option>
+                    <option value="otros">📦 Otros</option>
+                  </select>
+                  <div class="select-icon">⬇️</div>
+                </div>
+                <div id="category-error" class="error-message hidden" role="alert"></div>
+                <div class="category-budget" id="categoryBudget"></div>
+              </div>
+              
+              <div class="form-group">
+                <label class="label" for="provider">
+                  <span class="label-icon">🏪</span>
+                  Proveedor
+                </label>
+                <div class="input-wrapper">
+                  <input id="provider" 
+                         class="input modern-input" 
+                         type="text" 
+                         placeholder="Ej. AgroSur, Ferretería Central"
+                         list="providerSuggestions"
+                         autocomplete="organization"
+                         aria-describedby="provider-help" />
+                  <div class="input-icon">🏢</div>
+                </div>
+                <datalist id="providerSuggestions">
+                  <option value="AgroSur">
+                  <option value="Ferretería Central">
+                  <option value="Distribuidora La Cosecha">
+                  <option value="Gasolinera Shell">
+                  <option value="Agroquímicos GT">
+                </datalist>
+                <div id="provider-help" class="input-help">
+                  Se guardarán automáticamente para futuras compras
+                </div>
+              </div>
+            </div>
+
+            <!-- Descripción detallada -->
+            <div class="form-group">
+              <label class="label required" for="description">
+                <span class="label-icon">📋</span>
+                Descripción del gasto
+              </label>
+              <div class="input-wrapper">
+                <input id="description" 
+                       class="input modern-input" 
+                       type="text" 
+                       placeholder="Ej. Urea 46% saco 50kg, Gasolina para tractor, Salario semanal trabajador..."
+                       required
+                       maxlength="150"
+                       aria-describedby="description-error description-counter" />
+                <div class="input-icon">📝</div>
+              </div>
+              <div class="form-footer">
+                <div id="description-counter" class="character-counter">0/150</div>
+                <div id="description-error" class="error-message hidden" role="alert"></div>
+              </div>
+            </div>
+
+            <!-- Monto y Fecha -->
+            <div class="form-group-row">
+              <div class="form-group">
+                <label class="label required" for="amount">
+                  <span class="label-icon">💰</span>
+                  Monto del gasto
+                </label>
+                <div class="amount-input-wrapper">
+                  <div class="currency-symbol">Q</div>
+                  <input id="amount" 
+                         class="number-input modern-input amount-input" 
+                         type="number" 
+                         inputmode="decimal" 
+                         step="0.01" 
+                         min="0.01"
+                         max="99999.99"
+                         value="100.00"
+                         required
+                         aria-describedby="amount-error amount-help" />
+                  <div class="input-controls">
+                    <button type="button" class="btn-stepper" data-action="increment" data-target="amount">+</button>
+                    <button type="button" class="btn-stepper" data-action="decrement" data-target="amount">-</button>
+                  </div>
+                </div>
+                <div class="quick-amounts">
+                  <button type="button" class="btn-quick" data-add="#amount" data-val="50">+Q50</button>
+                  <button type="button" class="btn-quick" data-add="#amount" data-val="100">+Q100</button>
+                  <button type="button" class="btn-quick" data-add="#amount" data-val="500">+Q500</button>
+                  <button type="button" class="btn-quick" data-add="#amount" data-val="-25">-Q25</button>
+                </div>
+                <div id="amount-help" class="input-help">
+                  <span id="amountInWords">Cien quetzales</span>
+                </div>
+                <div id="amount-error" class="error-message hidden" role="alert"></div>
+              </div>
+              
+              <div class="form-group">
+                <label class="label required" for="dateInput">
+                  <span class="label-icon">📅</span>
+                  Fecha del gasto
+                </label>
+                <div class="date-input-wrapper">
+                  <input id="dateInput" 
+                         class="input modern-input" 
+                         type="date" 
+                         required
+                         aria-describedby="date-error" />
+                  <button type="button" id="setTodayBtn" class="btn-quick date-today">
+                    <span class="btn-icon">📅</span>
+                    Hoy
+                  </button>
+                </div>
+                <div id="date-error" class="error-message hidden" role="alert"></div>
+              </div>
+            </div>
+
+            <!-- Método de pago y notas -->
+            <div class="form-group-row">
+              <div class="form-group">
+                <label class="label" for="paymentMethod">
+                  <span class="label-icon">💳</span>
+                  Método de pago
+                </label>
+                <div class="payment-methods">
+                  <input type="radio" id="paymentCash" name="paymentMethod" value="efectivo" class="payment-radio" checked>
+                  <label for="paymentCash" class="payment-label">
+                    <span class="payment-icon">💵</span>
+                    <span class="payment-text">Efectivo</span>
+                  </label>
+                  
+                  <input type="radio" id="paymentTransfer" name="paymentMethod" value="transferencia" class="payment-radio">
+                  <label for="paymentTransfer" class="payment-label">
+                    <span class="payment-icon">🏦</span>
+                    <span class="payment-text">Transferencia</span>
+                  </label>
+                  
+                  <input type="radio" id="paymentCard" name="paymentMethod" value="tarjeta" class="payment-radio">
+                  <label for="paymentCard" class="payment-label">
+                    <span class="payment-icon">💳</span>
+                    <span class="payment-text">Tarjeta</span>
+                  </label>
+                  
+                  <input type="radio" id="paymentCredit" name="paymentMethod" value="credito" class="payment-radio">
+                  <label for="paymentCredit" class="payment-label">
+                    <span class="payment-icon">📝</span>
+                    <span class="payment-text">Crédito</span>
+                  </label>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="label" for="notes">
+                  <span class="label-icon">📝</span>
+                  Notas adicionales
+                  <span class="label-optional">(opcional)</span>
+                </label>
+                <div class="textarea-wrapper">
+                  <textarea id="notes" 
+                            class="textarea modern-input" 
+                            rows="3" 
+                            placeholder="Ej. Factura #1234, Para sector A, Urgente para aplicación..."
+                            maxlength="200"
+                            aria-describedby="notes-counter"></textarea>
+                  <div id="notes-counter" class="character-counter">0/200</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Resumen del gasto -->
+            <div id="expenseSummary" class="expense-summary hidden">
+              <h3 class="summary-title">💰 Resumen del Gasto</h3>
+              <div class="summary-grid">
+                <div class="summary-item">
+                  <span class="summary-label">Categoría:</span>
+                  <span id="summaryCategory" class="summary-value">—</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Proveedor:</span>
+                  <span id="summaryProvider" class="summary-value">—</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Monto:</span>
+                  <span id="summaryAmount" class="summary-value">Q0.00</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Impacto en presupuesto:</span>
+                  <span id="summaryBudgetImpact" class="summary-value">—</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="form-actions">
+              <button type="submit" id="saveExpenseBtn" class="btn btn-primary btn-large">
+                <span class="btn-icon">💾</span>
+                <span class="btn-text">Registrar Gasto</span>
+                <div class="btn-loading hidden">
+                  <div class="spinner"></div>
+                </div>
+              </button>
+              
+              <div class="secondary-actions">
+                <button type="button" id="clearBtn" class="btn btn-outline">
+                  <span class="btn-icon">🧹</span>
+                  Limpiar
+                </button>
+                <button type="button" id="duplicateBtn" class="btn btn-secondary">
+                  <span class="btn-icon">📋</span>
+                  Duplicar
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lista de gastos mejorada -->
+    <section class="list-section animate-on-load" style="--delay: 0.8s" role="region" aria-labelledby="expenses-list-title">
+      <div class="card modern-card">
+        <div class="card-header">
+          <h2 id="expenses-list-title">📜 Historial de Gastos</h2>
+          <div class="list-controls">
+            <div class="period-selector">
+              <button id="listToday" class="list-period-btn active">Hoy</button>
+              <button id="listWeek" class="list-period-btn">Semana</button>
+              <button id="listMonth" class="list-period-btn">Mes</button>
+            </div>
+            <button id="exportExpensesBtn" class="btn-icon-small" aria-label="Exportar gastos">
+              <span class="icon">📤</span>
+            </button>
           </div>
-          <div id="expList" class="list"></div>
+        </div>
+        <div class="card-body">
+          <!-- Resumen del período -->
+          <div class="period-summary">
+            <div class="summary-info">
+              <h3 id="periodTitle">Gastos de Hoy</h3>
+              <span id="periodDate" class="period-date"></span>
+            </div>
+            <div class="summary-totals">
+              <div class="summary-total">
+                <span class="total-value" id="periodTotal">Q0.00</span>
+                <span class="total-label">Total</span>
+              </div>
+              <div class="summary-total">
+                <span class="total-value" id="periodCount">0</span>
+                <span class="total-label">gastos</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Tabla responsive -->
+          <div class="table-responsive">
+            <div class="table-header">
+              <div class="table-cell">Hora</div>
+              <div class="table-cell">Categoría</div>
+              <div class="table-cell">Proveedor</div>
+              <div class="table-cell">Descripción</div>
+              <div class="table-cell">Monto</div>
+              <div class="table-cell">Acciones</div>
+            </div>
+            <div id="expensesList" class="table-body">
+              <!-- Los gastos se cargarán aquí dinámicamente -->
+              <div class="empty-state">
+                <div class="empty-icon">💸</div>
+                <p class="empty-message">No hay gastos registrados</p>
+                <p class="empty-submessage">Los gastos que registres aparecerán aquí</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- Firebase compat (CDN) -->
+  <!-- Toast notifications -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Modal de presupuesto -->
+  <div id="budgetModal" class="modal hidden" role="dialog" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content large">
+      <div class="modal-header">
+        <h3>📊 Gestión de Presupuesto</h3>
+        <button class="modal-close" aria-label="Cerrar modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="budgetContent">
+          <!-- Contenido del presupuesto se carga dinámicamente -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-  <!-- Config y offline -->
   <script src="js/firebase-config.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/offline.js"></script>
-
-    <!-- Nav común -->
   <script src="js/nav.js"></script>
-
-  <!-- Lógica -->
   <script src="js/gastos.js"></script>
 
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js', { scope: './' });
+    }
 
+    // Inicialización
+    document.addEventListener('DOMContentLoaded', function() {
+      // Animaciones de carga
+      const animatedElements = document.querySelectorAll('.animate-on-load');
+      animatedElements.forEach((el, index) => {
+        setTimeout(() => {
+          el.classList.add('animate-in');
+        }, index * 100);
+      });
 
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js', { scope: './' }); // ← relativo y con scope
-}
-</script>
+      // Configurar fecha actual
+      document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
+      
+      // Inicializar componentes
+      initializeExpenseForm();
+      initializeChart();
+      initializePeriodControls();
+      
+      // Cargar datos
+      loadExpenseData();
+    });
+
+    // Funciones auxiliares
+    function initializeExpenseForm() {
+      const amountInput = document.getElementById('amount');
+      const amountInWords = document.getElementById('amountInWords');
+      
+      amountInput.addEventListener('input', function() {
+        updateAmountInWords(this.value);
+        updateExpenseSummary();
+      });
+      
+      document.getElementById('setTodayBtn').addEventListener('click', function() {
+        document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
+      });
+    }
+    
+    function updateAmountInWords(amount) {
+      // Convertir número a palabras en español
+      const words = numberToWords(parseFloat(amount) || 0);
+      document.getElementById('amountInWords').textContent = words + ' quetzales';
+    }
+    
+    function numberToWords(num) {
+      if (num === 0) return 'Cero';
+      if (num === 100) return 'Cien';
+      if (num === 200) return 'Doscientos';
+      if (num === 500) return 'Quinientos';
+      if (num === 1000) return 'Mil';
+      return 'Aproximadamente ' + Math.round(num);
+    }
+    
+    function initializeChart() {
+      // Inicializar gráfico de gastos
+      // Se implementará con Chart.js o similar
+    }
+    
+    function initializePeriodControls() {
+      const periodBtns = document.querySelectorAll('.period-btn');
+      const listPeriodBtns = document.querySelectorAll('.list-period-btn');
+      
+      periodBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          periodBtns.forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          updateAnalysisData(this.id.replace('period', '').toLowerCase());
+        });
+      });
+      
+      listPeriodBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          listPeriodBtns.forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          updateExpensesList(this.id.replace('list', '').toLowerCase());
+        });
+      });
+    }
+    
+    function loadExpenseData() {
+      // Simular carga de datos
+      setTimeout(() => {
+        updateStats({
+          count: 5,
+          total: 1250.75,
+          average: 250.15,
+          topCategory: 'Fertilizantes',
+          monthTotal: 8450.25
+        });
+      }, 1000);
+    }
+    
+    function updateStats(data) {
+      document.getElementById('kpiExpCount').textContent = data.count;
+      document.getElementById('kpiExpTotal').textContent = 'Q' + data.total.toFixed(2);
+      document.getElementById('kpiExpAvg').textContent = 'Q' + data.average.toFixed(2);
+      document.getElementById('kpiTopCat').textContent = data.topCategory;
+      document.getElementById('kpiMonthTotal').textContent = 'Q' + data.monthTotal.toFixed(2);
+      
+      // Actualizar barra de presupuesto
+      const budgetPercentage = Math.min((data.total / 2000) * 100, 100);
+      document.getElementById('budgetFill').style.width = budgetPercentage + '%';
+      document.getElementById('budgetText').textContent = Math.round(budgetPercentage) + '% del presupuesto';
+    }
+    
+    function updateExpenseSummary() {
+      const category = document.getElementById('category').value;
+      const provider = document.getElementById('provider').value;
+      const amount = document.getElementById('amount').value;
+      
+      if (category || provider || amount > 0) {
+        document.getElementById('expenseSummary').classList.remove('hidden');
+        document.getElementById('summaryCategory').textContent = category || '—';
+        document.getElementById('summaryProvider').textContent = provider || '—';
+        document.getElementById('summaryAmount').textContent = 'Q' + (parseFloat(amount) || 0).toFixed(2);
+      }
+    }
+    
+    function updateAnalysisData(period) {
+      // Actualizar datos del análisis según el período
+    }
+    
+    function updateExpensesList(period) {
+      // Actualizar lista de gastos según el período
+    }
+  </script>
 </body>
 </html>
-
