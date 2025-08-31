@@ -22,6 +22,20 @@
     return total;
   }
 
+  // Agregar al final de offline.js, antes del cierre })();
+function syncPendingData() {
+    if (window.offline && window.offline.sync) {
+        window.offline.sync().then(count => {
+            console.log(`Sincronizados ${count} elementos`);
+        }).catch(error => {
+            console.error('Error en sincronización:', error);
+        });
+    }
+}
+
+// Exponer la función globalmente
+window.syncPendingData = syncPendingData;
+
   function setStatus(state, count = getPendingCount()) {
     if ($i) { $i.classList.remove("online", "offline", "syncing"); $i.classList.add(state); }
     if ($t) { 
@@ -86,3 +100,4 @@
   //   await db.collection("cosechas_diarias").add({ ...payload, fecha: new Date() });
   // });
 })();
+
