@@ -6,6 +6,10 @@
   <title>Precios MAGA · Finca La Herradura</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#7CB342" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
   <div id="connectivityIndicator" class="connectivity-indicator offline" aria-live="polite">
@@ -16,76 +20,197 @@
 
   <main class="page prices-page">
     <header class="page-header">
-      <h1>💰 Precios MAGA</h1>
-      <p class="subtitle">Limón persa — precio por <b>millar</b> (GTQ)</p>
+      <div class="header-content">
+        <div class="header-text">
+          <h1>💰 Precios MAGA</h1>
+          <p class="subtitle">Limón persa — precio por <b>millar</b> (GTQ)</p>
+          <small class="header-note">Peso por millar: 110kg | Mercados: CENMA y La Terminal</small>
+        </div>
+      </div>
     </header>
 
     <section class="stats-section">
-      <div class="stat-card">
-        <div class="stat-number" id="priceValue">—</div>
-        <div class="stat-label">Precio actual</div>
+      <div class="stat-card price-current animate-on-load" style="--delay: 0.1s">
+        <div class="stat-icon">💵</div>
+        <div class="stat-content">
+          <div class="stat-number" id="priceValue">—</div>
+          <div class="stat-label">Precio promedio</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-number" id="trendValue">—</div>
-        <div class="stat-label">Variación</div>
+      
+      <div class="stat-card price-trend animate-on-load" style="--delay: 0.2s">
+        <div class="stat-icon">📈</div>
+        <div class="stat-content">
+          <div class="stat-number" id="trendValue">—</div>
+          <div class="stat-label">Variación</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-number" id="kpiFav">—</div>
-        <div class="stat-label">Señal</div>
+      
+      <div class="stat-card price-signal animate-on-load" style="--delay: 0.3s">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-content">
+          <div class="stat-number" id="kpiFav">—</div>
+          <div class="stat-label">Señal de mercado</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-number" id="lastUpdate">—</div>
-        <div class="stat-label">Actualizado</div>
-      </div>
-    </section>
-
-    <section class="form-section">
-      <div class="card">
-        <div class="card-header"><h2>Acciones</h2></div>
-        <div class="card-body">
-          <div class="row row-actions">
-            <button id="refreshBtn" class="button primary">🔄 Actualizar MAGA</button>
-            <button id="forceBtn" class="button">⚡ Forzar scraping</button>
-            <button id="subBtn" class="button">🔔 Guía de alertas</button>
-          </div>
-          <small class="hint">Fuente: <a href="https://precios.maga.gob.gt/diarios/diarios.html" target="_blank" rel="noopener">MAGA</a></small>
+      
+      <div class="stat-card price-update animate-on-load" style="--delay: 0.4s">
+        <div class="stat-icon">🕒</div>
+        <div class="stat-content">
+          <div class="stat-number" id="lastUpdate">—</div>
+          <div class="stat-label">Última actualización</div>
         </div>
       </div>
     </section>
 
-    <section class="list-section">
-      <div class="card">
-        <div class="card-header"><h2>Histórico reciente</h2></div>
+    <!-- Panel de precios detallado -->
+    <section class="form-section animate-on-load" style="--delay: 0.5s">
+      <div class="card modern-card">
+        <div class="card-header">
+          <h2>📊 Precios por Mercado</h2>
+          <div class="market-status">
+            <span class="status-dot online"></span>
+            <span class="status-text">Datos MAGA oficiales</span>
+          </div>
+        </div>
         <div class="card-body">
-          <div id="historyList" class="list"></div>
+          <div class="price-breakdown">
+            <div class="market-price">
+              <div class="market-name">
+                <span class="market-icon">🏢</span>
+                <span class="market-label">CENMA</span>
+              </div>
+              <div class="market-value">Q800.00</div>
+              <div class="market-unit">por millar</div>
+            </div>
+            
+            <div class="price-separator">+</div>
+            
+            <div class="market-price">
+              <div class="market-name">
+                <span class="market-icon">🚚</span>
+                <span class="market-label">La Terminal</span>
+              </div>
+              <div class="market-value">Q800.00</div>
+              <div class="market-unit">por millar</div>
+            </div>
+          </div>
+          
+          <div class="price-info">
+            <div class="info-item">
+              <span class="info-icon">⚖️</span>
+              <span class="info-text">110 kg por millar</span>
+            </div>
+            <div class="info-item">
+              <span class="info-icon">📅</span>
+              <span class="info-text">Actualizado: 01 Sep 2025</span>
+            </div>
+            <div class="info-item">
+              <span class="info-icon">🔗</span>
+              <a href="https://precios.maga.gob.gt/diarios/diarios.html" target="_blank" rel="noopener" class="info-link">
+                Ver fuente oficial MAGA
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="form-section animate-on-load" style="--delay: 0.6s">
+      <div class="card modern-card">
+        <div class="card-header">
+          <h2>🔄 Acciones</h2>
+        </div>
+        <div class="card-body">
+          <div class="button-group">
+            <button id="refreshBtn" class="btn btn-primary">
+              <span class="btn-icon">🔄</span>
+              <span class="btn-text">Actualizar datos</span>
+            </button>
+            
+            <button id="forceBtn" class="btn btn-secondary">
+              <span class="btn-icon">⚡</span>
+              <span class="btn-text">Guardar precio actual</span>
+            </button>
+            
+            <button id="subBtn" class="btn btn-outline">
+              <span class="btn-icon">🔔</span>
+              <span class="btn-text">Guía de alertas</span>
+            </button>
+          </div>
+          
+          <div class="price-alerts">
+            <div class="alert-item">
+              <span class="alert-icon">📢</span>
+              <span class="alert-text">Señal <strong>favorable</strong> cuando el precio ≥ Q500 o sube ≥10%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="list-section animate-on-load" style="--delay: 0.7s">
+      <div class="card modern-card">
+        <div class="card-header">
+          <h2>📜 Histórico reciente</h2>
+          <div class="header-actions">
+            <button class="btn-icon-small" aria-label="Refrescar histórico" onclick="location.reload()">
+              <span class="icon">🔄</span>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <div class="table-header">
+              <div class="table-cell">Fecha</div>
+              <div class="table-cell">Precio</div>
+              <div class="table-cell">Fuente</div>
+            </div>
+            <div id="historyList" class="table-body">
+              <!-- Los datos históricos se cargarán aquí dinámicamente -->
+              <div class="loading-state">
+                <div class="loading-icon">⏳</div>
+                <p class="loading-message">Cargando datos históricos...</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- Firebase compat -->
+  <!-- Toast notifications -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-  <!-- Config + Auth + Offline -->
+  <!-- Scripts locales - RUTAS CORREGIDAS -->
   <script src="js/firebase-config.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/offline.js"></script>
-
-    <!-- Nav común -->
   <script src="js/nav.js"></script>
-
-  <!-- Lógica de precios -->
   <script src="js/precios.js"></script>
 
+  <!-- Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (!reg) navigator.serviceWorker.register('./sw.js').catch(console.error);
+      });
+    }
 
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js', { scope: './' }); // ← relativo y con scope
-}
-</script>
+    // Animaciones de carga
+    document.addEventListener('DOMContentLoaded', function() {
+      const animatedElements = document.querySelectorAll('.animate-on-load');
+      animatedElements.forEach((el, index) => {
+        setTimeout(() => {
+          el.classList.add('animate-in');
+        }, index * 100);
+      });
+    });
+  </script>
 </body>
 </html>
-
-
