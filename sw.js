@@ -1,5 +1,5 @@
 // sw.js - Versión mejorada y corregida
-const CACHE = "finca-herradura-v26"; // Incrementa la versión
+const CACHE = "finca-herradura-v27"; // Incrementa la versión
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -41,7 +41,14 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   // Solo manejar solicitudes GET válidas para cacheo
-  if (event.request.method !== 'GET' || !isValidCacheRequest(event.request)) {
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
+  // Validar URL antes de procesar
+  if (!isValidCacheRequest(event.request)) {
+    // Para URLs no válidas, solo hacer fetch normal sin cacheo
+    event.respondWith(fetch(event.request));
     return;
   }
   
@@ -77,4 +84,3 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
-
