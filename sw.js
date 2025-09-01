@@ -1,5 +1,5 @@
-// sw.js - Versión mejorada
-const CACHE = "finca-herradura-v25";
+// sw.js - Versión mejorada y corregida
+const CACHE = "finca-herradura-v26"; // Incrementa la versión
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -9,6 +9,16 @@ const APP_SHELL = [
   "./js/auth.js", 
   "./js/offline.js"
 ];
+
+// Función para validar si una URL es cacheable
+function isValidCacheRequest(request) {
+  const url = new URL(request.url);
+  // Solo cachear HTTP/HTTPS y mismo origen
+  return (url.protocol === 'http:' || url.protocol === 'https:') && 
+         !url.href.includes('chrome-extension://') &&
+         !url.href.includes('extension://') &&
+         !url.href.includes('moz-extension://');
+}
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -30,19 +40,28 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  // Solo manejar solicitudes GET
-  if (event.request.method !== 'GET') return;
+  // Solo manejar solicitudes GET válidas para cacheo
+  if (event.request.method !== 'GET' || !isValidCacheRequest(event.request)) {
+    return;
+  }
   
   event.respondWith(
     caches.match(event.request).then((cached) => {
       // Intentar network primero, fallar a cache
       return fetch(event.request)
         .then((response) => {
-          // Cachear respuesta exitosa
-          if (response.ok) {
+          // Cachear respuesta exitosa solo si es válida
+          if (response.ok && isValidCacheRequest(event.request)) {
             const responseClone = response.clone();
             caches.open(CACHE).then((cache) => {
-              cache.put(event.request, responseClone);
+              // Usar try-catch para manejar errores de cacheo
+              try {
+                cache.put(event.request, responseClone);
+              } catch (error) {
+                console.warn('No se pudo cachear:', event.request.url, error);
+              }
+            }).catch((error) => {
+              console.warn('Error abriendo cache:', error);
             });
           }
           return response;
@@ -58,3 +77,4 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+
