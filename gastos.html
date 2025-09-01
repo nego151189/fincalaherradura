@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="css/main.css" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#7CB342" />
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
@@ -419,7 +420,7 @@
               <div class="table-cell">Monto</div>
               <div class="table-cell">Acciones</div>
             </div>
-            <div id="expensesList" class="table-body">
+            <div id="expList" class="table-body">
               <!-- Los gastos se cargarán aquí dinámicamente -->
               <div class="empty-state">
                 <div class="empty-icon">💸</div>
@@ -452,20 +453,25 @@
     </div>
   </div>
 
-  <!-- Scripts -->
+  <!-- Scripts Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
+  <!-- Scripts locales - RUTAS CORREGIDAS -->
   <script src="js/firebase-config.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/offline.js"></script>
   <script src="js/nav.js"></script>
   <script src="js/gastos.js"></script>
 
+  <!-- Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js', { scope: './' });
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (!reg) navigator.serviceWorker.register('./sw.js').catch(console.error);
+      });
     }
 
     // Inicialización
@@ -479,7 +485,10 @@
       });
 
       // Configurar fecha actual
-      document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
+      const dateInput = document.getElementById('dateInput');
+      if (dateInput) {
+        dateInput.value = new Date().toISOString().split('T')[0];
+      }
       
       // Inicializar componentes
       initializeExpenseForm();
@@ -495,20 +504,28 @@
       const amountInput = document.getElementById('amount');
       const amountInWords = document.getElementById('amountInWords');
       
-      amountInput.addEventListener('input', function() {
-        updateAmountInWords(this.value);
-        updateExpenseSummary();
-      });
+      if (amountInput && amountInWords) {
+        amountInput.addEventListener('input', function() {
+          updateAmountInWords(this.value);
+          updateExpenseSummary();
+        });
+      }
       
-      document.getElementById('setTodayBtn').addEventListener('click', function() {
-        document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
-      });
+      const setTodayBtn = document.getElementById('setTodayBtn');
+      const dateInput = document.getElementById('dateInput');
+      if (setTodayBtn && dateInput) {
+        setTodayBtn.addEventListener('click', function() {
+          dateInput.value = new Date().toISOString().split('T')[0];
+        });
+      }
     }
     
     function updateAmountInWords(amount) {
-      // Convertir número a palabras en español
       const words = numberToWords(parseFloat(amount) || 0);
-      document.getElementById('amountInWords').textContent = words + ' quetzales';
+      const amountInWords = document.getElementById('amountInWords');
+      if (amountInWords) {
+        amountInWords.textContent = words + ' quetzales';
+      }
     }
     
     function numberToWords(num) {
@@ -560,28 +577,48 @@
     }
     
     function updateStats(data) {
-      document.getElementById('kpiExpCount').textContent = data.count;
-      document.getElementById('kpiExpTotal').textContent = 'Q' + data.total.toFixed(2);
-      document.getElementById('kpiExpAvg').textContent = 'Q' + data.average.toFixed(2);
-      document.getElementById('kpiTopCat').textContent = data.topCategory;
-      document.getElementById('kpiMonthTotal').textContent = 'Q' + data.monthTotal.toFixed(2);
+      const elements = {
+        kpiExpCount: document.getElementById('kpiExpCount'),
+        kpiExpTotal: document.getElementById('kpiExpTotal'),
+        kpiExpAvg: document.getElementById('kpiExpAvg'),
+        kpiTopCat: document.getElementById('kpiTopCat'),
+        kpiMonthTotal: document.getElementById('kpiMonthTotal'),
+        budgetFill: document.getElementById('budgetFill'),
+        budgetText: document.getElementById('budgetText')
+      };
+
+      if (elements.kpiExpCount) elements.kpiExpCount.textContent = data.count;
+      if (elements.kpiExpTotal) elements.kpiExpTotal.textContent = 'Q' + data.total.toFixed(2);
+      if (elements.kpiExpAvg) elements.kpiExpAvg.textContent = 'Q' + data.average.toFixed(2);
+      if (elements.kpiTopCat) elements.kpiTopCat.textContent = data.topCategory;
+      if (elements.kpiMonthTotal) elements.kpiMonthTotal.textContent = 'Q' + data.monthTotal.toFixed(2);
       
       // Actualizar barra de presupuesto
       const budgetPercentage = Math.min((data.total / 2000) * 100, 100);
-      document.getElementById('budgetFill').style.width = budgetPercentage + '%';
-      document.getElementById('budgetText').textContent = Math.round(budgetPercentage) + '% del presupuesto';
+      if (elements.budgetFill) elements.budgetFill.style.width = budgetPercentage + '%';
+      if (elements.budgetText) elements.budgetText.textContent = Math.round(budgetPercentage) + '% del presupuesto';
     }
     
     function updateExpenseSummary() {
-      const category = document.getElementById('category').value;
-      const provider = document.getElementById('provider').value;
-      const amount = document.getElementById('amount').value;
+      const category = document.getElementById('category');
+      const provider = document.getElementById('provider');
+      const amount = document.getElementById('amount');
+      const expenseSummary = document.getElementById('expenseSummary');
+      const summaryCategory = document.getElementById('summaryCategory');
+      const summaryProvider = document.getElementById('summaryProvider');
+      const summaryAmount = document.getElementById('summaryAmount');
       
-      if (category || provider || amount > 0) {
-        document.getElementById('expenseSummary').classList.remove('hidden');
-        document.getElementById('summaryCategory').textContent = category || '—';
-        document.getElementById('summaryProvider').textContent = provider || '—';
-        document.getElementById('summaryAmount').textContent = 'Q' + (parseFloat(amount) || 0).toFixed(2);
+      if (category && provider && amount && expenseSummary) {
+        const categoryValue = category.value;
+        const providerValue = provider.value;
+        const amountValue = amount.value;
+        
+        if (categoryValue || providerValue || amountValue > 0) {
+          expenseSummary.classList.remove('hidden');
+          if (summaryCategory) summaryCategory.textContent = categoryValue || '—';
+          if (summaryProvider) summaryProvider.textContent = providerValue || '—';
+          if (summaryAmount) summaryAmount.textContent = 'Q' + (parseFloat(amountValue) || 0).toFixed(2);
+        }
       }
     }
     
