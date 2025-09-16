@@ -20,7 +20,7 @@ let currentLocation = null;
 
 // Configuración mejorada del mapa con fallback
 const mapConfig = {
-    center: [-90.5069, 14.6349], // [lng, lat] para Mapbox
+    center: [-90.2552, 14.7703], // [lng, lat] para Mapbox
     zoom: 15,
     accessToken: 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw',
     fallbackEnabled: true
