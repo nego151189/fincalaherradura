@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "firebase": "8.2.3",
-    "expo-status-bar": "~3.0.8",
-    "@expo/vector-icons": "^15.0.3"
-  }
-}
